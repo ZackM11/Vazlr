@@ -3,6 +3,8 @@ Valzr is a volunteer matcher - it matches volunteers with nonprofits. Provides a
 
 
 ### Example `ProjectSourceCode/.env`
+A .env.example file has been added so that everyone is able to pull a sample .env. 
+Remember the .env should be in .gitignore
 ```
 # database credentials
 POSTGRES_USER="postgres"
