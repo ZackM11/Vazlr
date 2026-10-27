@@ -1,1 +1,3 @@
-CREATE TABLE IF NOT EXISTS 
+CREATE TABLE IF NOT EXISTS volunteers(
+    first_name NOT NULL 
+);
