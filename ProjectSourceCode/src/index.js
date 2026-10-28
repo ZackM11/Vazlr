@@ -80,7 +80,19 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.send("Fuck you");
+  res.render("main");
+});
+
+app.get("/home", (req, res) => {
+  res.render("home");
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.get("/register", (req, res) => {
+  res.render("register");
 });
 
 // starting the server and keeping the connection open to listen for more requests
