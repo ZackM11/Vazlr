@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manager Dashboard | Vazlr</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-12 pt-1">
+                <div class="bg-light">
+                    <div class="card-body">
+                            <div class="d-flex">
+                                <h5 class="pt-2">Event Calendar</h5>
+                                <div class="ms-auto">
+                                    <button class="btn btn-primary">Today</button>
+                                    <button class="btn btn-primary" onclick="updateViewToWeek()">Week View</button>
+                                    <button class="btn btn-primary" onclick="updateViewToMonth()">Month View</button>
+                                    <button class="btn btn-primary">&lsaquo;</button>
+                                    <button class="btn btn-primary">&rsaquo;</button>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center pt-2">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Sunday</th>
+                        <th scope="col">Monday</th>
+                        <th scope="col">Tuesday</th>
+                        <th scope="col">Wednesday</th>
+                        <th scope="col">Thursday</th>
+                        <th scope="col">Friday</th>
+                        <th scope="col">Saturday</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Place sunday events</td>
+                        <td>Place monday events</td>
+                        <td>Place tuesday events</td>
+                        <td>Place wednesday events</td>
+                        <td>Place thursday events</td>
+                        <td>Place friday events</td>
+                        <td>Place saturday events</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        // Custom JavaScript for the calendar can go here
+        const calendarTable = document.querySelector('table');
+        const now = new Date();
+        // Start of week (Sunday)
+        const month = new Date(now.getFullYear(), now.getMonth(), 1);   
+        const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+        let currweek = startOfWeek;
+        
+        let currview = 'week';
+
+        function updateViewToMonth() {
+            currview = 'month';
+            // Update the calendar table to show the month view
+        }
+        function updateViewToWeek() {
+            currview = 'week';
+            // Update the calendar table to show the week view
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
