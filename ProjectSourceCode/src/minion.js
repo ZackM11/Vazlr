@@ -10,8 +10,43 @@ const bcrypt = require("bcryptjs"); //  To hash passwords
 const axios = require("axios");
 const router = express.Router();
 
+/* Bcrypt salt rounds */
+const SALT_ROUNDS = 12;
+
 router.get("/testing", (req, res) => {
   res.send("You are a minion");
+});
+
+/* /register and /login are boilerplate
+ * TODO: Add actual paths when frontend is created
+ */
+router.get("/register", (req, res) => {
+  res.render("pages/minion-registration");
+});
+
+router.get("/login", (req, res) => {
+  res.render("pages/minion-login");
+});
+
+router.post("/register", async (req, res) => {
+  const hashed_pw = await bycrypt.hash(req.body.password, SALT_ROUNDS);
+	
+  /* TODO:
+   * Insert username and password into SQL table
+   * Return http status
+   */
+});
+
+router.post("/login", async (req, res) => {
+  /* TODO: Get password for username from db */
+  const matches = await bycrypt.compare(req.body.password, user.password);
+  if (matches) { /* Log user in */
+    req.session.user = user;
+    req.session.save();
+	/* TODO: Redirect to dashboard */
+  } else {
+    /* TODO: Render login page with incorrect pw error */
+  }
 });
 
 module.exports = router;
