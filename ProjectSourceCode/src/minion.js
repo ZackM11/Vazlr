@@ -28,6 +28,24 @@ router.get("/login", (req, res) => {
   res.render("pages/minion-login");
 });
 
+/* Get events for event calendar */
+router.get("/getEvents", (req, res) => {
+  let query = ""; //TODO: Put events query here
+
+  try {
+    let results = await db.one(query);
+    res.status(200).json({
+      data: results,
+    });
+  } catch (err) {
+    res.status(400).json({
+      error: err,
+    });
+  }
+});
+
+// Add listings
+
 router.post("/register", async (req, res) => {
   const hashed_pw = await bycrypt.hash(req.body.password, SALT_ROUNDS);
 	
