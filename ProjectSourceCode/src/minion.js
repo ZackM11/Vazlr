@@ -26,7 +26,7 @@ router.get("/login", (req, res) => {
 });
 
 /* Get events for event calendar */
-router.get("/getEvents", (req, res) => {
+router.get("/getEvents", async (req, res) => {
 	let query = ""; //TODO: Put events query here
 
 	try {
