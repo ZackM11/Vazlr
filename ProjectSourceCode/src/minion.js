@@ -14,57 +14,57 @@ const router = express.Router();
 const SALT_ROUNDS = 12;
 
 router.get("/testing", (req, res) => {
-  res.send("You are a minion");
+	res.send("You are a minion");
 });
 
 /* /register and /login are boilerplate
  * TODO: Add actual paths when frontend is created
  */
 router.get("/register", (req, res) => {
-  res.render("pages/minion-registration");
+	res.render("pages/minion-registration");
 });
 
 router.get("/login", (req, res) => {
-  res.render("pages/minion-login");
+	res.render("pages/minion-login");
 });
 
 /* Get events for event calendar */
 router.get("/getEvents", (req, res) => {
-  let query = ""; //TODO: Put events query here
+	let query = ""; //TODO: Put events query here
 
-  try {
-    let results = await db.one(query);
-    res.status(200).json({
-      data: results,
-    });
-  } catch (err) {
-    res.status(400).json({
-      error: err,
-    });
-  }
+	try {
+		let results = await db.one(query);
+		res.status(200).json({
+			data: results,
+		});
+	} catch (err) {
+		res.status(400).json({
+			error: err,
+		});
+	}
 });
 
 // Add listings
 
 router.post("/register", async (req, res) => {
-  const hashed_pw = await bycrypt.hash(req.body.password, SALT_ROUNDS);
-	
-  /* TODO:
-   * Insert username and password into SQL table
-   * Return http status
-   */
+	const hashed_pw = await bycrypt.hash(req.body.password, SALT_ROUNDS);
+
+	/* TODO:
+	 * Insert username and password into SQL table
+	 * Return http status
+	 */
 });
 
 router.post("/login", async (req, res) => {
-  /* TODO: Get password for username from db */
-  const matches = await bycrypt.compare(req.body.password, user.password);
-  if (matches) { /* Log user in */
-    req.session.user = user;
-    req.session.save();
-	/* TODO: Redirect to dashboard */
-  } else {
-    /* TODO: Render login page with incorrect pw error */
-  }
+	/* TODO: Get password for username from db */
+	const matches = await bycrypt.compare(req.body.password, user.password);
+	if (matches) { /* Log user in */
+		req.session.user = user;
+		req.session.save();
+		/* TODO: Redirect to dashboard */
+	} else {
+		/* TODO: Render login page with incorrect pw error */
+	}
 });
 
 module.exports = router;
