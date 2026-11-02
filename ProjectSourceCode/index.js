@@ -98,3 +98,12 @@ console.log("Server is listening on port 3000");
 
 
 
+<<<<<<< HEAD
+=======
+
+
+// Using this to test minion-dash for now 
+app.get('/minion-dash', (req, res) => {
+  res.render('pages/minion-dash');
+});
+>>>>>>> 0a8859a (adding a .get path just to test html for now)
