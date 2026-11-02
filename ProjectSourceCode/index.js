@@ -99,3 +99,12 @@ app.get("/register", (req, res) => {
 // starting the server and keeping the connection open to listen for more requests
 app.listen(3000);
 console.log("Server is listening on port 3000");
+
+
+
+
+
+// Using this to test minion-dash for now 
+app.get('/minion-dash', (req, res) => {
+  res.render('pages/minion-dash');
+});
