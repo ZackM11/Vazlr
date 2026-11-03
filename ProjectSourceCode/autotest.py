@@ -10,10 +10,12 @@ TIMEOUT = 60  # Maximum startup time in seconds
 
 def main():
     # 1. Start Docker Compose in the background
-    subprocess.run(
-        ["docker", "compose", "-f", COMPOSE_FILE, "up", "-d"],
+    x = subprocess.run(
+        ["docker", "compose", "-f", COMPOSE_FILE, "up", "--wait"],
         check=True,
     )
+
+    print(x)
 
     # 2. Block until the server is ready
     print("Waiting for server to start...")
@@ -32,10 +34,10 @@ def main():
         except urllib.error.HTTPError as e:
             last_error = f"HTTP {e.code}"
 
-        except (urllib.error.URLError, TimeoutError) as e:
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
             last_error = str(e)
 
-        print("sleeping")
+        print("sleeping 1 second")
         time.sleep(1)
 
     # 3. Error if the server never returned HTTP 200
