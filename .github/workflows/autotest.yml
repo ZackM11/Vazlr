@@ -12,12 +12,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Change to ProjectSourceCode
-        run: cd ProjectSourceCode
-
       - name: Start server and run tests
+        working-directory: ProjectSourceCode
         run: python3 autotest.py
 
       - name: Stop Docker containers
+        working-directory: ProjectSourceCode
         if: always()
         run: docker compose down
