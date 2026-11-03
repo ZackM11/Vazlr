@@ -1,0 +1,76 @@
+<div class="container my-5" style ="max-width: 720px;">
+    {{#if error}}
+    <div class="alert alert-danger" role="alert">{{error}}</div>
+    {{/if}}
+
+
+    <div class="card mb-4 shadow-sm">
+        {{#if event.image_url}}
+            <img src="{{event.image_url}}" class="card-img-top" alt="{{event.title}}" style ="max-height: 220px; object-fit: cover;">
+        {{/if}}
+        <div class="card-body">
+            <h2 class="card-title h4 mb-1">{{event.title}}</h2>
+            <p  class="text-muted mb-2">
+                Hosted by {{event.org_name}}
+            </p>
+            <p class="mb-1"><strong>When:</strong> {{event.date}}{{#if event.time}} at {{event.time}}{{/if}}</p>
+            <p class="mb-1"><strong>Where:</strong> {{event.location}}</p>
+            {{#if event.spots_left}}
+                <p class="mb-0"><strong>Spots left:</strong> {{event.spots_left}}</p>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card body">
+            <h3 class="h5 mb-3">Sign up for this event!</h3>
+
+            <form action="/events/{{event.event_id}}/book" method="POST">
+                <div class="mb-3">
+          <label for="name" class="form-label">Full name</label>
+          <input type="text" class="form-control" id="name" name="name" value="{{user.name}}" required maxlength="100">
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" required maxlength="100">
+        </div>
+
+        <div class="mb-3">
+          <label for="phone" class="form-label">Phone <span class="text-muted">(optional)</span></label>
+          <input type="tel" class="form-control" id="phone" name="phone" maxlength="20">
+        </div>
+
+        {{!-- Only shows if the event has time slots --}}
+        {{#if event.slots}}
+          <div class="mb-3">
+            <label for="slot" class="form-label">Choose a time slot</label>
+            <select class="form-select" id="slot" name="slot_id" required>
+              <option value="" selected disabled>Pick a slot</option>
+              {{#each event.slots}}
+                <option value="{{this.slot_id}}">{{this.label}}</option>
+              {{/each}}
+            </select>
+          </div>
+        {{/if}}
+
+        <div class="mb-3">
+          <label for="notes" class="form-label">Anything the organizer should know? <span class="text-muted">(optional)</span></label>
+          <textarea class="form-control" id="notes" name="notes" rows="3" maxlength="500"></textarea>
+        </div>
+
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="commit" name="commit" required>
+          <label class="form-check-label" for="commit">
+            I commit to showing up (no-shows may get banned)
+          </label>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Confirm sign-up</button>
+          <a href="/minion-dash" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -108,3 +108,23 @@ console.log("Server is listening on port 3000");
 app.get('/minion-dash', (req, res) => {
   res.render('pages/minion-dash');
 });
+
+// TEMP (Zack): fake data to preview the booking page
+app.get('/bookin-form', (req, res) => {
+  res.render('pages/bookin-form', {
+    event: {
+      event_id: 1,
+      title: 'Park Cleanup',
+      date: 'Nov 8',
+      time: '9:00 AM',
+      location: 'Boulder',
+      org_name: 'Green Boulder',
+      verified: true,
+      spots_left: 12,
+      slots: [
+        { slot_id: 1, label: '9:00 – 11:00 AM' },
+        { slot_id: 2, label: '11:00 AM – 1:00 PM' }
+      ]
+    }
+  });
+});
