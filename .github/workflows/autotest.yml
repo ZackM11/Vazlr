@@ -1,0 +1,23 @@
+name: Python Autotest
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Change to ProjectSourceCode
+        run: cd ProjectSourceCode
+
+      - name: Start server and run tests
+        run: python3 autotest.py
+
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose down
