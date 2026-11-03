@@ -12,6 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Make .env file from example
+        working-directory: ProjectSourceCode
+        run: cp .env.example .env
+
       - name: Start server and run tests
         working-directory: ProjectSourceCode
         run: python3 autotest.py
