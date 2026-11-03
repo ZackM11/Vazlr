@@ -2,13 +2,13 @@ import subprocess
 import time
 import urllib.error
 import urllib.request
+from tokenize import String
 
 COMPOSE_FILE = "docker-compose.yaml"
-URL = "http://localhost:3000/login"
 TIMEOUT = 60  # Maximum startup time in seconds
 
 
-def main():
+def startup():
     # 1. Start Docker Compose in the background
     x = subprocess.run(
         ["docker", "compose", "-f", COMPOSE_FILE, "up", "--wait"],
@@ -24,7 +24,9 @@ def main():
 
     while time.monotonic() < deadline:
         try:
-            with urllib.request.urlopen(URL, timeout=2) as response:
+            with urllib.request.urlopen(
+                "http://localhost:3000/login", timeout=2
+            ) as response:
                 if response.status == 200:
                     print("Server is ready! HTTP 200")
                     return
@@ -46,5 +48,20 @@ def main():
     )
 
 
+def page_exists(url: str):
+    try:
+        with urllib.request.urlopen(url, timeout=2) as response:
+            if response.status == 200:
+                print(f"Page {url} exists")
+                return
+
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"Failed to open page {url}. Status code HTTP {e.code}")
+
+    except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+        raise RuntimeError(f"Failed to open page {url}. Internal error {str(e)}")
+
+
 if __name__ == "__main__":
-    main()
+    startup()
+    page_exists("http://localhost:3000/register")
