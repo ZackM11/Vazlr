@@ -96,6 +96,11 @@ app.get("/register", (req, res) => {
   res.render("pages/register");
 });
 
+// Riley - Just for me to test my frontend dash - delete when necessary
+app.get("/orgs-test", (req,res) => {
+  res.render("pages/org-dash");
+});
+
 // starting the server and keeping the connection open to listen for more requests
 app.listen(3000);
 console.log("Server is listening on port 3000");
