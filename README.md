@@ -26,3 +26,6 @@ To access the database directly (note that the server must already be running):
 ```
 docker compose exec db psql -U postgres
 ```
+
+#### Register API Testing
+Both register APIs (`/volunteers/register` and `/orgs/register`) expect to be POSTed with an object with fields `{email: String, password: String}`

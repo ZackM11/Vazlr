@@ -88,6 +88,6 @@ def register_api(url: str):
 
 
 if __name__ == "__main__":
-    # startup()
+    startup()
     page_exists("http://localhost:3000/register")
     register_api("http://localhost:3000/volunteers/register")
