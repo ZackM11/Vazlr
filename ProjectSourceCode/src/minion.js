@@ -29,7 +29,8 @@ router.get("/login", (req, res) => {
 
 /* Get events for event calendar */
 router.get("/getEvents", async (req, res) => {
-	const query = ""; //TODO: Put events query here
+	const query = `SELECT organization_id, category_id, title, description, image_url,
+                    address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
 
 	try {
 		let results = await db.one(query);
@@ -55,9 +56,11 @@ router.post("/register", async (req, res) => {
 	}
 
 	const hashed_pw = await bycrypt.hash(req.body.password, SALT_ROUNDS);
-	const query = ""; // TODO: Insert query here to insert user email and hashed_pw into db
-
-	try {
+  // TODO: Insert query here to insert user email and hashed_pw into db
+	const query = `INSERT * INTO users (id, email, password_hash, role)
+                 ('${id}', '${email}', ${password}, ${role}) RETURNING user.id ;`
+	
+  try {
 		let results = await db.one(query);
 		res.status(200).json({
 			data: "User successfully registered",
@@ -78,7 +81,8 @@ router.post("/login", async (req, res) => {
 		});
 	}
 
-	const getUserQuery = ""; /* TODO: Insert query to get user from db by email */
+  /* TODO: query to check if user exists from db by email */
+	const getUserQuery = `SELECT * FROM users WHERE email = ${email}`; 
 	let user;
 
 	try {
