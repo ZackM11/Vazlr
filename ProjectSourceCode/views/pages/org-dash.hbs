@@ -4,62 +4,126 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Manager Dashboard | Vazlr</title>
+    <title>Organization Dashboard | Vazlr</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="/css/dashboard.css" rel="stylesheet">
 </head>
 
-<body>
-    <br>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h1 class="card-title text-center">Welcome --insert username here---!</h1>
-                    </div>
+<body class="dashboard-page">
+    <div class="container-fluid p-0">
+        <div class="row g-0 dashboard-shell">
+            <aside class="col-md-3 col-xl-2 dashboard-sidebar" aria-label="Organization dashboard navigation">
+                <p class="sidebar-label">Workspace</p>
+                <nav class="d-grid gap-1">
+                    <a class="sidebar-link" href="#events">Events</a>
+                    <a class="sidebar-link" href="#volunteers">Volunteers</a>
+                    <a class="sidebar-link" href="#calendar">Calendar</a>
+                </nav>
+
+                <div class="sidebar-actions">
+                    <button class="btn btn-create-event rounded-3 py-2" type="button" data-bs-toggle="modal"
+                        data-bs-target="#createEventModal">
+                        Create event
+                    </button>
+                    <a class="btn btn-sign-up rounded-3 py-2" href="/register">Sign up</a>
                 </div>
-            </div>
+            </aside>
+
+            <main class="col-md-9 col-xl-10">
+                <div class="dashboard-main">
+                    <header class="mb-4 mb-lg-5">
+                        <p class="eyebrow mb-1">Organization dashboard</p>
+                        <h1 class="welcome-title">Welcome back, organizer</h1>
+                        <p class="welcome-copy mb-0">Keep your community events and volunteers moving forward.</p>
+                    </header>
+
+                    <div class="row g-3 g-lg-4 mb-3 mb-lg-4">
+                        <section class="col-lg-6" id="events" aria-labelledby="events-title">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h2 class="section-title" id="events-title">Event list</h2>
+                                            <p class="section-subtitle small mb-0 mt-1">Your upcoming community events</p>
+                                        </div>
+                                        <span class="badge rounded-pill text-bg-light">3 events</span>
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <span class="list-indicator" aria-hidden="true"></span>Event 1
+                                            <span class="list-meta float-end">Upcoming</span>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="list-indicator" aria-hidden="true"></span>Event 2
+                                            <span class="list-meta float-end">Upcoming</span>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="list-indicator" aria-hidden="true"></span>Event 3
+                                            <span class="list-meta float-end">Upcoming</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="col-lg-6" id="volunteers" aria-labelledby="volunteers-title">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h2 class="section-title" id="volunteers-title">Volunteer signups</h2>
+                                            <p class="section-subtitle small mb-0 mt-1">People supporting your events</p>
+                                        </div>
+                                        <span class="badge rounded-pill text-bg-light">3 volunteers</span>
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <span class="list-indicator" aria-hidden="true"></span>User 1
+                                            <span class="list-meta float-end">Signed up</span>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="list-indicator" aria-hidden="true"></span>User 2
+                                            <span class="list-meta float-end">Signed up</span>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="list-indicator" aria-hidden="true"></span>User 3
+                                            <span class="list-meta float-end">Signed up</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <section class="card dashboard-card calendar-card" id="calendar" aria-label="Event calendar">
+                        <div class="card-body">
+                            {{> calendar}}
+                        </div>
+                    </section>
+                </div>
+            </main>
         </div>
-        <br>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Event List</h5>
-                        <ul>
-                            <li>Event 1</li>
-                            <li>Event 2</li>
-                            <li>Event 3</li>
-                        </ul>
-                    </div>
+    </div>
+
+    <div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h2 class="modal-title fs-5 fw-bold" id="createEventModalLabel">Create an event</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Volunteer List and Signups</h5>
-                        <ul>
-                            <li>User 1</li>
-                            <li>User 2</li>
-                            <li>User 3</li>
-                        </ul>
-                    </div>
+                <div class="modal-body pt-2">
+                    Event creation is coming soon. You can still browse the event calendar and manage volunteer signups.
                 </div>
-            </div>
-        </div>
-        <br>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Event Calendar</h5>
-                        {{> calendar}}
-                    </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-dark rounded-3 px-4" data-bs-dismiss="modal">Got it</button>
                 </div>
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
