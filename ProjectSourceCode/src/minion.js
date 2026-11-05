@@ -46,27 +46,31 @@ router.get("/getEvents", async (req, res) => {
 // Add listings
 
 router.post("/register", async (req, res) => {
-	const valid = userSchema.safeParse(req.body);
+  const valid = userSchema.safeParse(req.body);
 
-	if (!valid) {
-		return res.status(400).json({
-			errors: result.error.format()
-		});
-	}
+  if (!valid) {
+    console.log(`Invalid register request: ${result.error.format()}`);
+    return res.status(400).json({
+      errors: result.error.format(),
+    });
+  }
 
-	const hashed_pw = await bycrypt.hash(req.body.password, SALT_ROUNDS);
-	const query = ""; // TODO: Insert query here to insert user email and hashed_pw into db
-
-	try {
-		let results = await db.one(query);
-		res.status(200).json({
-			data: "User successfully registered",
-		});
-	} catch (err) {
-		res.status(400).json({
-			error: err,
-		});
-	}
+  const hashed_pw = await bcrypt.hash(req.body.password, SALT_ROUNDS);
+  const query = ""; // TODO: Insert query here to insert user email and hashed_pw into db
+  res.status(200).json({
+    data: "User successfully registered",
+  });
+  return;
+  try {
+    let results = await db.one(query);
+    res.status(200).json({
+      data: "User successfully registered",
+    });
+  } catch (err) {
+    res.status(400).json({
+      error: err,
+    });
+  }
 });
 
 router.post("/login", async (req, res) => {

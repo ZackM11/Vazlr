@@ -1,3 +1,4 @@
+import json
 import subprocess
 import time
 import urllib.error
@@ -62,6 +63,31 @@ def page_exists(url: str):
         raise RuntimeError(f"Failed to open page {url}. Internal error {str(e)}")
 
 
+def register_api(url: str):
+
+    body = {"email": "gloriousUser@gmail.com", "password": "4"}
+    data = json.dumps(body).encode("utf-8")
+
+    try:
+        req = urllib.request.Request(
+            url, data=data, headers={"Content-Type": "application/json"}, method="POST"
+        )
+
+        with urllib.request.urlopen(req) as response:
+            if response.status == 200:
+                print(
+                    f"Register page: {url} works and returns result: {response.read().decode('utf-8')}"
+                )
+                return
+
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"Failed to open page {url}. Status code HTTP {e.code}")
+
+    except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+        raise RuntimeError(f"Failed to open page {url}. Internal error {str(e)}")
+
+
 if __name__ == "__main__":
-    startup()
+    # startup()
     page_exists("http://localhost:3000/register")
+    register_api("http://localhost:3000/volunteers/register")
