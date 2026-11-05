@@ -29,7 +29,8 @@ router.get("/login", (req, res) => {
 
 /* Get events for event calendar */
 router.get("/getEvents", async (req, res) => {
-	const query = ""; //TODO: Put events query here
+	const query = `SELECT organization_id, category_id, title, description, image_url,
+                    address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
 
 	try {
 		let results = await db.one(query);
@@ -82,7 +83,8 @@ router.post("/login", async (req, res) => {
 		});
 	}
 
-	const getUserQuery = ""; /* TODO: Insert query to get user from db by email */
+  /* TODO: query to check if user exists from db by email */
+	const getUserQuery = `SELECT * FROM users WHERE email = ${email}`; 
 	let user;
 
 	try {
@@ -102,6 +104,14 @@ router.post("/login", async (req, res) => {
 	} else {
 		/* TODO: Render login page with incorrect pw error */
 	}
+});
+
+app.get("/minion-dash", (req, res) => {
+  res.render('pages/minion-dash', {
+    events : [
+      {event_id: 1, title: 'Park Cleanup', date : 'Nov 8', location : 'Boulder'}
+    ]
+  });
 });
 
 module.exports = router;
