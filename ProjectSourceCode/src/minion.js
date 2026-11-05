@@ -100,4 +100,12 @@ router.post("/login", async (req, res) => {
 	}
 });
 
+app.get("/minion-dash", (req, res) => {
+  res.render('pages/minion-dash', {
+    events : [
+      {event_id: 1, title: 'Park Cleanup', date : 'Nov 8', location : 'Boulder'}
+    ]
+  });
+});
+
 module.exports = router;
