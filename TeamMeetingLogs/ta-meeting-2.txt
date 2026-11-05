@@ -1,0 +1,9 @@
+2nd meeting with TA on 11/04/26
+
+* Zack and Riley showed basic frontend functionality
+	- Zack showed minion end, Riley the organization end.
+
+* We need release notes in the future
+	- Should be in the milestonesSubmissions folder.
+	- Instructions/guide is on the Project Guide class page
+	- Upload release notes by class time tommorow (11/05)
