@@ -29,3 +29,6 @@ docker compose exec db psql -U postgres
 
 #### Register API Testing
 Both register APIs (`/volunteers/register` and `/orgs/register`) expect to be POSTed with an object with fields `{email: String, password: String}`
+
+#### Frontend testing:
+Each partial has an associated testing "key" at the beginning of it. The autotests will fetch each page and look for this key. If the key is found, the partial is properly included.

@@ -87,7 +87,57 @@ def register_api(url: str):
         raise RuntimeError(f"Failed to open page {url}. Internal error {str(e)}")
 
 
+def page_contains_keys(url: str, keys: list[str]):
+    try:
+        with urllib.request.urlopen(url, timeout=2) as response:
+            data = str(response.read()).split(" ")
+            for i in range(len(keys)):
+                if keys[i] in data:
+                    print(f"Key {keys[i]} included in page {url}")
+                    return
+                raise RuntimeError(f"Key {keys[i]} not included in page {url}")
+
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"Failed to open page {url}. Status code HTTP {e.code}")
+
+    except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+        raise RuntimeError(f"Failed to open page {url}. Internal error {str(e)}")
+
+
+def page_not_contains_keys(url: str, keys: list[str]):
+    try:
+        with urllib.request.urlopen(url, timeout=2) as response:
+            data = str(response.read()).split(" ")
+            for i in range(len(keys)):
+                if keys[i] in data:
+                    raise RuntimeError(
+                        f"Key {keys[i]} included in page {url}, and it shouldn't be"
+                    )
+                print(f"Key {keys[i]} not included in page {url} (This is good)")
+                return
+
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"Failed to open page {url}. Status code HTTP {e.code}")
+
+    except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+        raise RuntimeError(f"Failed to open page {url}. Internal error {str(e)}")
+
+
+# TODO: test for strings
+
 if __name__ == "__main__":
     startup()
     page_exists("http://localhost:3000/register")
     register_api("http://localhost:3000/volunteers/register")
+    page_contains_keys(
+        "http://localhost:3000/volunteers/minion-dash",
+        [
+            "SkibidiHeaderIncluded67",
+            "SkibidiNavBarIncluded67",
+            "SkibidiPartialCalendarIncluded67",
+            "SkibidiFooterIncluded67",
+        ],
+    )
+    page_not_contains_keys(
+        "http://localhost:3000/register", ["SkibidiPartialCalendarIncluded67"]
+    )
