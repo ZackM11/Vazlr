@@ -15,33 +15,33 @@ const router = express.Router();
 const SALT_ROUNDS = 12;
 
 const userSchema = zod.object({
-	email: zod.string().email("Invalid user email"),
-	password: zod.string()
+  email: zod.string().email("Invalid user email"),
+  password: zod.string(),
 });
 
 router.get("/register", (req, res) => {
-	res.render("pages/minion-registration");
+  res.render("pages/minion-registration");
 });
 
 router.get("/login", (req, res) => {
-	res.render("pages/minion-login");
+  res.render("pages/minion-login");
 });
 
 /* Get events for event calendar */
 router.get("/getEvents", async (req, res) => {
-	const query = `SELECT organization_id, category_id, title, description, image_url,
+  const query = `SELECT organization_id, category_id, title, description, image_url,
                     address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
 
-	try {
-		let results = await db.one(query);
-		res.status(200).json({
-			data: results,
-		});
-	} catch (err) {
-		res.status(400).json({
-			error: err,
-		});
-	}
+  try {
+    let results = await db.one(query);
+    res.status(200).json({
+      data: results,
+    });
+  } catch (err) {
+    res.status(400).json({
+      error: err,
+    });
+  }
 });
 
 // Add listings
@@ -75,42 +75,48 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-	const valid = userSchema.safeParse(req.body);
+  const valid = userSchema.safeParse(req.body);
 
-	if (!valid) {
-		return res.status(400).json({
-			errors: result.error.format()
-		});
-	}
+  if (!valid) {
+    return res.status(400).json({
+      errors: result.error.format(),
+    });
+  }
 
   /* TODO: query to check if user exists from db by email */
-	const getUserQuery = `SELECT * FROM users WHERE email = ${email}`; 
-	let user;
+  const getUserQuery = `SELECT * FROM users WHERE email = ${email}`;
+  let user;
 
-	try {
-		user = await db.any(getUserQuery);
-	} catch (err) {
-		return res.status(400).json({
-			error: err,
-		});
-	}
+  try {
+    user = await db.any(getUserQuery);
+  } catch (err) {
+    return res.status(400).json({
+      error: err,
+    });
+  }
 
-	const pwMatches = await bycrypt.compare(req.body.password, user.password);
+  const pwMatches = await bycrypt.compare(req.body.password, user.password);
 
-	if (pwMatches) { /* Log user in */
-		req.session.user = user;
-		req.session.save();
-		/* TODO: Redirect to dashboard */
-	} else {
-		/* TODO: Render login page with incorrect pw error */
-	}
+  if (pwMatches) {
+    /* Log user in */
+    req.session.user = user;
+    req.session.save();
+    /* TODO: Redirect to dashboard */
+  } else {
+    /* TODO: Render login page with incorrect pw error */
+  }
 });
 
-app.get("/minion-dash", (req, res) => {
-  res.render('pages/minion-dash', {
-    events : [
-      {event_id: 1, title: 'Park Cleanup', date : 'Nov 8', location : 'Boulder'}
-    ]
+router.get("/minion-dash", (req, res) => {
+  res.render("pages/minion-dash", {
+    events: [
+      {
+        event_id: 1,
+        title: "Park Cleanup",
+        date: "Nov 8",
+        location: "Boulder",
+      },
+    ],
   });
 });
 
