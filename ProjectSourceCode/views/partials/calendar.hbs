@@ -6,33 +6,40 @@
                 <div class="card-body">
                     <div class="d-flex">
                         <h5 class="pt-2 calendar-title">Event Calendar</h5>
-                        <div class="ms-auto">
+                        <div class="ms-auto calendar-controls">
                             <button
-                                class="btn btn-primary bg-warning"
+                                class="btn calendar-action"
+                                type="button"
                                 onclick="goToToday()"
                             >
                                 Today
                             </button>
                             <button
-                                class="btn btn-primary bg-warning"
+                                class="btn calendar-action"
+                                type="button"
                                 onclick="updateViewToWeek()"
                             >
                                 Week View
                             </button>
                             <button
-                                class="btn btn-primary bg-warning"
+                                class="btn calendar-action"
+                                type="button"
                                 onclick="updateViewToMonth()"
                             >
                                 Month View
                             </button>
                             <button
-                                class="btn btn-primary bg-warning"
+                                class="btn calendar-action calendar-nav"
+                                type="button"
+                                aria-label="Previous"
                                 onclick="goToPrevious()"
                             >
                                 &lsaquo;
                             </button>
                             <button
-                                class="btn btn-primary bg-warning"
+                                class="btn calendar-action calendar-nav"
+                                type="button"
+                                aria-label="Next"
                                 onclick="goToNext()"
                             >
                                 &rsaquo;
@@ -44,7 +51,7 @@
         </div>
     </div>
     <div class="row justify-content-center pt-2">
-        <table class="table table-bordered week-view">
+        <table class="table week-view calendar-grid">
             <thead class="week-heading">
                 <tr>
                     <th scope="col">Sunday</th>
@@ -68,7 +75,7 @@
                 </tr>
             </tbody>
         </table>
-        <table class="table table-bordered month-view" style="display: none">
+        <table class="table month-view calendar-grid" style="display: none">
             <thead>
                 <tr>
                     <th scope="col">Sun</th>
