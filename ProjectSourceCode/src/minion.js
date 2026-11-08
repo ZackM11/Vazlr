@@ -20,11 +20,11 @@ const userSchema = zod.object({
 });
 
 router.get("/register", (req, res) => {
-  res.render("pages/minion-registration");
+  res.render("pages/register");
 });
 
 router.get("/login", (req, res) => {
-  res.render("pages/minion-login");
+  res.render("pages/login");
 });
 
 /* Get events for event calendar */
