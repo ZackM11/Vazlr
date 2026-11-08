@@ -7,11 +7,11 @@ const app = express();
 const handlebars = require("express-handlebars"); //to enable express to work with handlebars
 const Handlebars = require("handlebars"); // to include the templating engine responsible for compiling templates
 const path = require("path");
-const pgp = require("pg-promise")(); // To connect to the Postgres DB from the node server
 const bodyParser = require("body-parser");
 const session = require("express-session"); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const bcrypt = require("bcryptjs"); //  To hash passwords
 const axios = require("axios"); // To make HTTP requests from our server. We'll learn more about it in Part C.
+const db = require("./src/db.js");
 const minion_routes = require("./src/minion.js");
 const org_routes = require("./src/organizations.js");
 
@@ -25,17 +25,6 @@ const hbs = handlebars.create({
   layoutsDir: __dirname + "/views/layouts",
   partialsDir: __dirname + "/views/partials",
 });
-
-// database configuration
-const dbConfig = {
-  host: "db", // the database server
-  port: 5432, // the database port
-  database: process.env.POSTGRES_DB, // the database name
-  user: process.env.POSTGRES_USER, // the user account to connect with
-  password: process.env.POSTGRES_PASSWORD, // the password of the user account
-};
-
-const db = pgp(dbConfig);
 
 //Todo: When its time to add login, uncomment this
 /*const auth = (req, res, next) => {
