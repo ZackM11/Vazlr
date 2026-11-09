@@ -65,6 +65,7 @@ app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "src/resources")));
+app.use("/img", express.static(path.join(__dirname, "img")));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 
 // initialize session variables
@@ -105,7 +106,6 @@ app.get("/orgs-test", (req,res) => {
 // starting the server and keeping the connection open to listen for more requests
 app.listen(3000);
 console.log("Server is listening on port 3000");
-
 
 
 
