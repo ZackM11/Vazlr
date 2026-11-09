@@ -53,7 +53,7 @@ router.post("/register", async (req, res) => {
   if (!zod_result.success) {
     return res.status(400).json({
 	  message: "Failed to register user",
-      errors: zod_result.error.flatten().fieldErrors,
+      errors: zod_result.error.flatten().fieldErrors
     });
   }
 
@@ -75,36 +75,43 @@ router.post("/register", async (req, res) => {
   }
 });
 
+/* Also expects email and password field in body */
 router.post("/login", async (req, res) => {
-  const valid = userSchema.safeParse(req.body);
+  const zod_result = userSchema.safeParse(req.body);
 
-  if (!valid) {
+  if (!zod_result.success) {
     return res.status(400).json({
-      errors: result.error.format(),
+	  message: "Failed to login user",
+      errors: zod_result.error.flatten().fieldErrors
     });
   }
 
-  /* TODO: query to check if user exists from db by email */
-  const getUserQuery = `SELECT * FROM users WHERE email = ${email}`;
+  const vbody = zod_result.data;
+  const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
   let user;
 
   try {
-    user = await db.any(getUserQuery);
+    user = await db.one(getUserQuery);
   } catch (err) {
     return res.status(400).json({
-      error: err,
+      error: "Incorrect email or password",
     });
   }
 
-  const pwMatches = await bycrypt.compare(req.body.password, user.password);
+  const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
 
-  if (pwMatches) {
-    /* Log user in */
+  if (pwMatches) { /* Log user in */
     req.session.user = user;
     req.session.save();
     /* TODO: Redirect to dashboard */
+    res.status(200).json({
+      data: "User logged in",
+    });
   } else {
     /* TODO: Render login page with incorrect pw error */
+    res.status(200).json({
+      error: "Incorrect email or password",
+    });
   }
 });
 
