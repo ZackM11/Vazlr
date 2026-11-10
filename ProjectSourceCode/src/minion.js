@@ -19,6 +19,11 @@ const userSchema = zod.object({
   password: zod.string(),
 });
 
+router.get("/dashboard", (req, res) => {
+  console.log(req.session.user); /* Example of how to access user session cookie */
+  res.render("pages/minion-dash");
+});
+
 router.get("/register", (req, res) => {
   res.render("pages/register");
 });
@@ -101,31 +106,17 @@ router.post("/login", async (req, res) => {
   const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
 
   if (pwMatches) { /* Log user in */
+    delete user.password_hash; /* Don't need to store their pw hash */
     req.session.user = user;
     req.session.save();
-    /* TODO: Redirect to dashboard */
-    res.status(200).json({
-      data: "User logged in",
-    });
+
+    res.redirect('/volunteers/dashboard');
   } else {
     /* TODO: Render login page with incorrect pw error */
     res.status(200).json({
       error: "Incorrect email or password",
     });
   }
-});
-
-router.get("/minion-dash", (req, res) => {
-  res.render("pages/minion-dash", {
-    events: [
-      {
-        event_id: 1,
-        title: "Park Cleanup",
-        date: "Nov 8",
-        location: "Boulder",
-      },
-    ],
-  });
 });
 
 module.exports = router;
