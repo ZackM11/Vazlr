@@ -130,7 +130,7 @@ if __name__ == "__main__":
     page_exists("http://localhost:3000/register")
     register_api("http://localhost:3000/volunteers/register")
     page_contains_keys(
-        "http://localhost:3000/volunteers/minion-dash",
+        "http://localhost:3000/volunteers/dashboard",
         [
             "SkibidiHeaderIncluded67",
             "SkibidiNavBarIncluded67",
