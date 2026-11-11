@@ -1,9 +1,10 @@
-{{!-- booking-confirmed.hbs — shown after a volunteer signs up (Zack)
-  Expects: event: { event_id, title, date, time, location, org_name }
-           user (optional): { name }
---}}
+
+<link rel="stylesheet" href="/css/booking.css">
+<div class="booking-page">
+
 
 <div class="container my-5 text-center" style="max-width: 600px;">
+
 
   <div class="display-4 mb-2">🎉</div>
   <h1 class="h3 mb-2">You're signed up{{#if user.name}}, {{user.name}}{{/if}}!</h1>
@@ -22,5 +23,7 @@
     <a href="/minion-dash" class="btn btn-primary">Back to dashboard</a>
     <a href="/my-events" class="btn btn-outline-secondary">View my events</a>
   </div>
+
+</div>
 
 </div>
