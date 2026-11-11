@@ -26,7 +26,7 @@ const userSchema = zod.object({
 });
 
 router.get("/register", (req, res) => {
-  res.render("pages/org-registration");
+  res.render("pages/register");
 });
 
 router.get("/login", (req, res) => {
@@ -53,23 +53,24 @@ router.get("/getEvents", async (req, res) => {
 // Add listings
 
 router.post("/register", async (req, res) => {
-  const valid = userSchema.safeParse(req.body);
+  const zod_result = userSchema.safeParse(req.body);
 
-  if (!valid) {
-    console.log(`Invalid register request: ${result.error.format()}`);
+  /* Invalid req.body fields */
+  if (!zod_result.success) {
     return res.status(400).json({
-      errors: result.error.format(),
+      message: "Failed to register user",
+      errors: zod_result.error.flatten().fieldErrors,
     });
   }
 
-  const hashed_pw = await bcrypt.hash(req.body.password, SALT_ROUNDS);
-  const query = ""; // TODO: Insert query here to insert user email and hashed_pw into db
-  res.status(200).json({
-    data: "User successfully registered",
-  });
-  return;
+  /* Validated body, use this instead of req.body from here on */
+  const vbody = zod_result.data;
+  const hashed_pw = await bcrypt.hash(vbody.password, SALT_ROUNDS);
+  const query = `INSERT INTO users (email, password_hash, role)
+                 VALUES ('${vbody.email}', '${hashed_pw}', 'volunteer');`;
+
   try {
-    let results = await db.one(query);
+    let results = await db.any(query);
     res.status(200).json({
       data: "User successfully registered",
     });
@@ -81,35 +82,41 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const valid = userSchema.safeParse(req.body);
+  const zod_result = userSchema.safeParse(req.body);
 
-  if (!valid) {
+  if (!zod_result.success) {
     return res.status(400).json({
-      errors: result.error.format(),
+      message: "Failed to login user",
+      errors: zod_result.error.flatten().fieldErrors,
     });
   }
 
-  /* TODO: query to check if user exists from db by email */
-  const getUserQuery = `SELECT * FROM users WHERE email = ${email}`;
+  const vbody = zod_result.data;
+  const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
   let user;
 
   try {
-    user = await db.any(getUserQuery);
+    user = await db.one(getUserQuery);
   } catch (err) {
     return res.status(400).json({
-      error: err,
+      error: "Incorrect email or password",
     });
   }
 
-  const pwMatches = await bycrypt.compare(req.body.password, user.password);
+  const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
 
   if (pwMatches) {
     /* Log user in */
+    delete user.password_hash; /* Don't need to store their pw hash */
     req.session.user = user;
     req.session.save();
-    /* TODO: Redirect to dashboard */
+
+    res.redirect("/orgs/dashboard");
   } else {
     /* TODO: Render login page with incorrect pw error */
+    res.status(200).json({
+      error: "Incorrect email or password",
+    });
   }
 });
 
