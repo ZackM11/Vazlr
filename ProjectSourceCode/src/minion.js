@@ -80,43 +80,4 @@ router.post("/register", async (req, res) => {
   }
 });
 
-/* Also expects email and password field in body */
-router.post("/login", async (req, res) => {
-  const zod_result = userSchema.safeParse(req.body);
-
-  if (!zod_result.success) {
-    return res.status(400).json({
-	  message: "Failed to login user",
-      errors: zod_result.error.flatten().fieldErrors
-    });
-  }
-
-  const vbody = zod_result.data;
-  const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
-  let user;
-
-  try {
-    user = await db.one(getUserQuery);
-  } catch (err) {
-    return res.status(400).json({
-      error: "Incorrect email or password",
-    });
-  }
-
-  const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
-
-  if (pwMatches) { /* Log user in */
-    delete user.password_hash; /* Don't need to store their pw hash */
-    req.session.user = user;
-    req.session.save();
-
-    res.redirect('/volunteers/dashboard');
-  } else {
-    /* TODO: Render login page with incorrect pw error */
-    res.status(200).json({
-      error: "Incorrect email or password",
-    });
-  }
-});
-
 module.exports = router;
