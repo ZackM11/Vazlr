@@ -12,6 +12,7 @@ const session = require("express-session"); // To set the session object. To sto
 const bcrypt = require("bcryptjs"); //  To hash passwords
 const axios = require("axios"); // To make HTTP requests from our server. We'll learn more about it in Part C.
 const db = require("./src/db.js");
+const zod = require("zod"); // For post request body validation
 const minion_routes = require("./src/minion.js");
 const org_routes = require("./src/organizations.js");
 
@@ -34,6 +35,11 @@ const hbs = handlebars.create({
   }
   next();
 };*/
+
+const userSchema = zod.object({
+  email: zod.string().email("Invalid user email"),
+  password: zod.string(),
+});
 
 // test your database
 db.connect()
@@ -92,9 +98,48 @@ app.get("/orgs-test", (req,res) => {
   res.render("pages/org-dash");
 });
 
+app.post("/login", async (req, res) => {
+  const zod_result = userSchema.safeParse(req.body);
+
+  if (!zod_result.success) {
+    return res.status(400).json({
+	  message: "Failed to login user",
+      errors: zod_result.error.flatten().fieldErrors
+    });
+  }
+
+  const vbody = zod_result.data;
+  const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
+  let user;
+
+  try {
+    user = await db.one(getUserQuery);
+  } catch (err) {
+    return res.status(400).json({
+      error: "Incorrect email or password",
+    });
+  }
+
+  const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
+
+  if (pwMatches) { /* Log user in */
+    delete user.password_hash; /* Don't need to store their pw hash */
+    req.session.user = user;
+    req.session.save();
+
+    if (user.role === "volunteer") {
+      res.redirect('/volunteers/dashboard');
+	} else {
+      res.redirect('/orgs/dashboard');
+	}
+  } else {
+    /* TODO: Render login page with incorrect pw error */
+    res.status(200).json({
+      error: "Incorrect email or password",
+    });
+  }
+});
+
 // starting the server and keeping the connection open to listen for more requests
 app.listen(3000);
 console.log("Server is listening on port 3000");
-
-
-
