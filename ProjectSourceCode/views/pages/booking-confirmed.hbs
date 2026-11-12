@@ -1,0 +1,29 @@
+
+<link rel="stylesheet" href="/css/booking.css">
+<div class="booking-page">
+
+
+<div class="container my-5 text-center" style="max-width: 600px;">
+
+
+  <div class="display-4 mb-2">🎉</div>
+  <h1 class="h3 mb-2">You're signed up{{#if user.name}}, {{user.name}}{{/if}}!</h1>
+  <p class="text-muted mb-4">Thanks for being a hero. The world just got a little better.</p>
+
+  <div class="card shadow-sm text-start mb-4">
+    <div class="card-body">
+      <h2 class="h5 card-title mb-3">{{event.title}}</h2>
+      <p class="mb-1"><strong>Hosted by:</strong> {{event.org_name}}</p>
+      <p class="mb-1"><strong>When:</strong> {{event.date}}{{#if event.time}} at {{event.time}}{{/if}}</p>
+      <p class="mb-0"><strong>Where:</strong> {{event.location}}</p>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-center gap-2">
+    <a href="/minion-dash" class="btn btn-primary">Back to dashboard</a>
+    <a href="/my-events" class="btn btn-outline-secondary">View my events</a>
+  </div>
+
+</div>
+
+</div>
