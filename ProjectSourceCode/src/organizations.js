@@ -35,6 +35,11 @@ router.get("/login", (req, res) => {
 
 /* Get events for event calendar */
 router.get("/getEvents", async (req, res) => {
+  const zod_result = userSchema.safeParse(req.body);
+
+  // TODO: Put a query here that gets the org id from the email
+
+  // TODO: Make this query only return events from the logged-in organization
   const query = `SELECT organization_id, category_id, title, description, image_url,
                     address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
 
