@@ -16,32 +16,29 @@ const zod = require("zod"); // For post request body validation
 const minion_routes = require("./src/minion.js");
 const org_routes = require("./src/organizations.js");
 
-// *****************************************************
-// <!-- Section 2 : Connect to DB -->
-// *****************************************************
+/* Global variables */
+const SALT_ROUNDS = 12;
 
-// create `ExpressHandlebars` instance and configure the layouts and partials dir.
+const userLoginSchema = zod.object({
+	email: zod.string().email("Invalid user email"),
+	password: zod.string(),
+});
+
+const userRegisterSchema = zod.object({
+	email: zod.string().email("Invalid user email"),
+	password: zod.string(),
+	confirm_password: zod.string(),
+	role: zod.string().regex(/^volunteer$|^organization$/) /* Will error if role is not volunteer or org */
+});
+
+/* Configure HBS */
 const hbs = handlebars.create({
 	extname: "hbs",
 	layoutsDir: __dirname + "/views/layouts",
 	partialsDir: __dirname + "/views/partials",
 });
 
-//Todo: When its time to add login, uncomment this
-/*const auth = (req, res, next) => {
-  if (!req.session.user) {
-	  // Default to login page.
-	return res.redirect("/login");
-  }
-  next();
-};*/
-
-	  const userSchema = zod.object({
-		  email: zod.string().email("Invalid user email"),
-		  password: zod.string(),
-	  });
-
-// test your database
+/* Test database connection */
 db.connect()
 	.then((obj) => {
 		console.log("Database connection successful"); // you can view this message in the docker compose logs
@@ -51,9 +48,7 @@ db.connect()
 		console.log("ERROR:", error.message || error);
 	});
 
-// *****************************************************
-// <!-- Section 3 : App Settings -->
-// *****************************************************
+/* App settings */
 
 // Register `hbs` as our view engine using its bound `engine()` function.
 app.engine("hbs", hbs.engine);
@@ -78,6 +73,8 @@ app.use(
 	}),
 );
 
+/* Routes */
+
 app.use("/volunteers", minion_routes);
 app.use("/orgs", org_routes);
 
@@ -98,37 +95,54 @@ app.get("/orgs-test", (req,res) => {
 	res.render("pages/org-dash");
 });
 
-router.post("/register", async (req, res) => {
-	const zod_result = userSchema.safeParse(req.body);
+app.post("/register", async (req, res) => {
+	const zod_result = userRegisterSchema.safeParse(req.body);
 
 	/* Invalid req.body fields */
 	if (!zod_result.success) {
-		return res.status(400).json({
-			message: "Failed to register user",
-			errors: zod_result.error.flatten().fieldErrors
+		res.render('pages/register', {
+			error: 'Unable to register user'
 		});
+		return;
 	}
 
 	/* Validated body, use this instead of req.body from here on */
 	const vbody = zod_result.data;
+
+	if(vbody.password !== vbody.confirm_password) {
+		res.render('pages/register', {
+			error: 'Passwords don\'t match'
+		});
+		return;
+	}
+
 	const hashed_pw = await bcrypt.hash(vbody.password, SALT_ROUNDS);
 	const query = `INSERT INTO users (email, password_hash, role)
-				 VALUES ('${vbody.email}', '${hashed_pw}', 'volunteer');`;
+	               VALUES ('${vbody.email}', '${hashed_pw}', '${vbody.role}')
+	               RETURNING id, email, role, created_at;`;
+	let user;
 
 	try {
-		let results = await db.any(query);
-		res.status(200).json({
-			data: "User successfully registered",
-		});
+		user = await db.one(query);
 	} catch (err) {
 		res.status(400).json({
 			error: err,
 		});
 	}
+
+	/* Log user in */
+	req.session.user = user;
+	req.session.save();
+
+	if (user.role === "volunteer") {
+		res.redirect('/volunteers/dashboard');
+	} else {
+		res.redirect('/orgs/dashboard');
+	}
 });
 
 app.post("/login", async (req, res) => {
-	const zod_result = userSchema.safeParse(req.body);
+	const zod_result = userLoginSchema.safeParse(req.body);
 
 	if (!zod_result.success) {
 		return res.status(400).json({
@@ -167,6 +181,19 @@ app.post("/login", async (req, res) => {
 
 	res.render('pages/login', {
 		message: 'Incorrect username/password'
+	});
+});
+
+app.post("/logout", (req, res) => {
+	req.session.destroy((err) => {
+		if (err) {
+			return res.status(500).json({
+				message: 'Unable to log user out'
+			});
+		}
+
+		res.clearCookie('connect.sid');
+		res.redirect('/');
 	});
 });
 
