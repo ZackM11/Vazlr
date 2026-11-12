@@ -22,34 +22,34 @@ const org_routes = require("./src/organizations.js");
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
 const hbs = handlebars.create({
-  extname: "hbs",
-  layoutsDir: __dirname + "/views/layouts",
-  partialsDir: __dirname + "/views/partials",
+	extname: "hbs",
+	layoutsDir: __dirname + "/views/layouts",
+	partialsDir: __dirname + "/views/partials",
 });
 
 //Todo: When its time to add login, uncomment this
 /*const auth = (req, res, next) => {
   if (!req.session.user) {
-    // Default to login page.
-    return res.redirect("/login");
+	  // Default to login page.
+	return res.redirect("/login");
   }
   next();
 };*/
 
-const userSchema = zod.object({
-  email: zod.string().email("Invalid user email"),
-  password: zod.string(),
-});
+	  const userSchema = zod.object({
+		  email: zod.string().email("Invalid user email"),
+		  password: zod.string(),
+	  });
 
 // test your database
 db.connect()
-  .then((obj) => {
-    console.log("Database connection successful"); // you can view this message in the docker compose logs
-    obj.done(); // success, release the connection;
-  })
-  .catch((error) => {
-    console.log("ERROR:", error.message || error);
-  });
+	.then((obj) => {
+		console.log("Database connection successful"); // you can view this message in the docker compose logs
+		obj.done(); // success, release the connection;
+	})
+	.catch((error) => {
+		console.log("ERROR:", error.message || error);
+	});
 
 // *****************************************************
 // <!-- Section 3 : App Settings -->
@@ -65,79 +65,80 @@ app.use(bodyParser.json()); // specify the usage of JSON for parsing request bod
 
 // initialize session variables
 app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    saveUninitialized: false,
-    resave: false,
-  }),
+	session({
+		secret: process.env.SESSION_SECRET,
+		saveUninitialized: false,
+		resave: false,
+	}),
 );
 
 app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  }),
+	bodyParser.urlencoded({
+		extended: true,
+	}),
 );
 
 app.use("/volunteers", minion_routes);
 app.use("/orgs", org_routes);
 
 app.get("/", (req, res) => {
-  res.render("pages/home");
+	res.render("pages/home");
 });
 
 app.get("/login", (req, res) => {
-  res.render("pages/login");
+	res.render("pages/login");
 });
 
 app.get("/register", (req, res) => {
-  res.render("pages/register");
+	res.render("pages/register");
 });
 
 // Riley - Just for me to test my frontend dash - delete when necessary
 app.get("/orgs-test", (req,res) => {
-  res.render("pages/org-dash");
+	res.render("pages/org-dash");
 });
 
 app.post("/login", async (req, res) => {
-  const zod_result = userSchema.safeParse(req.body);
+	const zod_result = userSchema.safeParse(req.body);
 
-  if (!zod_result.success) {
-    return res.status(400).json({
-	  message: "Failed to login user",
-      errors: zod_result.error.flatten().fieldErrors
-    });
-  }
-
-  const vbody = zod_result.data;
-  const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
-  let user;
-
-  try {
-    user = await db.one(getUserQuery);
-  } catch (err) {
-    return res.status(400).json({
-      error: "Incorrect email or password",
-    });
-  }
-
-  const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
-
-  if (pwMatches) { /* Log user in */
-    delete user.password_hash; /* Don't need to store their pw hash */
-    req.session.user = user;
-    req.session.save();
-
-    if (user.role === "volunteer") {
-      res.redirect('/volunteers/dashboard');
-	} else {
-      res.redirect('/orgs/dashboard');
+	if (!zod_result.success) {
+		return res.status(400).json({
+			message: "Failed to login user",
+			errors: zod_result.error.flatten().fieldErrors
+		});
 	}
-  } else {
-    /* TODO: Render login page with incorrect pw error */
-    res.status(200).json({
-      error: "Incorrect email or password",
-    });
-  }
+
+	const vbody = zod_result.data;
+	const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
+	let user;
+
+	try {
+		user = await db.one(getUserQuery);
+	} catch (err) {
+		res.render('pages/login', {
+			message: 'Unable to log user in'
+		});
+		return;
+	}
+
+	const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
+
+	if (pwMatches) { /* Log user in */
+		delete user.password_hash; /* Don't need to store their pw hash */
+		req.session.user = user;
+		req.session.save();
+
+		if (user.role === "volunteer") {
+			res.redirect('/volunteers/dashboard');
+		} else {
+			res.redirect('/orgs/dashboard');
+		}
+		return;
+	}
+
+	res.render('pages/login', {
+		message: 'Incorrect username/password'
+	});
 });
 
 // starting the server and keeping the connection open to listen for more requests
