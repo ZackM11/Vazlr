@@ -4,62 +4,160 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Volunteer Page | Vazlr</title>
+    <title>Volunteer Dashboard | Vazlr</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="/css/dashboard.css" rel="stylesheet">
 </head>
 
-<body>
-    <br>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h1 class="card-title text-center">Welcome --insert username here---!</h1>
-                    </div>
+<body class="dashboard-page">
+    <div class="container-fluid p-0">
+        <div class="row g-0 dashboard-shell">
+
+            {{!-- Sidebar --}}
+            <aside class="col-md-3 col-xl-2 dashboard-sidebar" aria-label="Volunteer dashboard navigation">
+                <p class="sidebar-label">Your hero hub</p>
+                <nav class="d-grid gap-1">
+                    <a class="sidebar-link" href="#events">Browse events</a>
+                    <a class="sidebar-link" href="#my-events">My signups</a>
+                    <a class="sidebar-link" href="#calendar">My calendar</a>
+                </nav>
+
+                <div class="sidebar-actions">
+                    <a class="btn btn-create-event rounded-3 py-2" href="#events">Find an event</a>
+                    <a class="btn btn-sign-up rounded-3 py-2" href="/logout">Log out</a>
                 </div>
-            </div>
-        </div>
-        <br>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Event List</h5>
-                        <ul>
-                            <li>Event 1</li>
-                            <li>Event 2</li>
-                            <li>Event 3</li>
-                        </ul>
+            </aside>
+
+            <main class="col-md-9 col-xl-10">
+                <div class="dashboard-main">
+
+                    {{!-- Welcome header --}}
+                    <header class="mb-4">
+                        <p class="eyebrow mb-1">Volunteer dashboard</p>
+                        <h1 class="welcome-title">Welcome back, {{#if user.name}}{{user.name}}{{else}}hero{{/if}} 🦸</h1>
+                        <p class="welcome-copy mb-0">
+                            You have {{myEvents.length}} upcoming {{#if myEvents.length}}signups{{else}}signups. Let's change that{{/if}}.
+                            Every shift you take changes the world a little.
+                        </p>
+                    </header>
+
+                    <div class="row g-3 g-lg-4 mb-3 mb-lg-4">
+
+                        {{!-- Events open for signup --}}
+                        <section class="col-lg-7" id="events" aria-labelledby="events-title">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h2 class="section-title" id="events-title">Events for signup</h2>
+                                            <p class="section-subtitle small mb-0 mt-1">Generous philanthropists need heroes like you</p>
+                                        </div>
+                                        <span class="badge rounded-pill text-bg-light">{{events.length}} events</span>
+                                    </div>
+
+                                    {{!-- Compact filters: sends GET /minion-dash?cause=...&date=...&location=... --}}
+                                    <form class="d-flex flex-wrap gap-2 mt-2 mb-1" action="/minion-dash" method="GET">
+                                        <select class="form-select form-select-sm w-auto" name="cause" aria-label="Filter by cause">
+                                            <option value="">Any cause</option>
+                                            <option value="environment">Environment</option>
+                                            <option value="hunger">Hunger</option>
+                                            <option value="animals">Animals</option>
+                                            <option value="education">Education</option>
+                                            <option value="community">Community</option>
+                                        </select>
+                                        <input type="date" class="form-control form-control-sm w-auto" name="date"
+                                               value="{{filters.date}}" aria-label="Filter by date">
+                                        <input type="text" class="form-control form-control-sm" style="max-width: 130px;" name="location"
+                                               placeholder="City" value="{{filters.location}}" maxlength="50" aria-label="Filter by location">
+                                        <button type="submit" class="btn btn-sm btn-create-event rounded-3">Filter</button>
+                                        <a href="/minion-dash" class="btn btn-sm btn-link text-decoration-none px-1">Clear</a>
+                                    </form>
+
+                                    {{#if events}}
+                                        <ul class="list-group list-group-flush">
+                                            {{#each events}}
+                                                <li class="list-group-item">
+                                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                                        <div>
+                                                            <div class="fw-semibold">
+                                                                <span class="list-indicator" aria-hidden="true"></span>{{this.title}}
+                                                                {{#if this.cause}}
+                                                                    <span class="badge rounded-pill text-bg-light ms-1">{{this.cause}}</span>
+                                                                {{/if}}
+                                                            </div>
+                                                            <div class="list-meta mt-1">
+                                                                {{this.date}}{{#if this.time}} at {{this.time}}{{/if}} · {{this.location}}
+                                                            </div>
+                                                            <div class="list-meta">
+                                                                {{this.org_name}}
+                                                                {{#if this.verified}}<span class="text-success fw-semibold">✓ Verified</span>{{/if}}
+                                                                {{#if this.spots_left}} · {{this.spots_left}} spots left{{/if}}
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex flex-column gap-1 flex-shrink-0">
+                                                            {{!-- TEMP: these go to test pages. Later: /events/{{this.event_id}} and /events/{{this.event_id}}/book --}}
+                                                            <a class="btn btn-sm btn-create-event rounded-3" href="/book-event">Sign up</a>
+                                                            <a class="btn btn-sm btn-outline-secondary rounded-3" href="/events/{{this.event_id}}">Details</a>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            {{/each}}
+                                        </ul>
+                                    {{else}}
+                                        <p class="list-meta mb-0 mt-3">No events match right now. Try clearing your filters or check back soon!</p>
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </section>
+
+                        {{!-- Events this volunteer signed up for --}}
+                        <section class="col-lg-5" id="my-events" aria-labelledby="my-events-title">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h2 class="section-title" id="my-events-title">My signups</h2>
+                                            <p class="section-subtitle small mb-0 mt-1">Where you're making a difference</p>
+                                        </div>
+                                        <span class="badge rounded-pill text-bg-light">{{myEvents.length}} upcoming</span>
+                                    </div>
+
+                                    {{#if myEvents}}
+                                        <ul class="list-group list-group-flush">
+                                            {{#each myEvents}}
+                                                <li class="list-group-item">
+                                                    <div class="d-flex justify-content-between gap-2">
+                                                        <span><span class="list-indicator" aria-hidden="true"></span>{{this.title}}</span>
+                                                        <span class="list-meta text-nowrap">{{this.date}}</span>
+                                                    </div>
+                                                    <div class="list-meta mt-1">
+                                                        {{#if this.time}}{{this.time}} · {{/if}}{{this.location}}{{#if this.org_name}} · {{this.org_name}}{{/if}}
+                                                    </div>
+                                                </li>
+                                            {{/each}}
+                                        </ul>
+                                    {{else}}
+                                        <p class="list-meta mb-0 mt-3">You haven't signed up for anything yet. Pick an event to get started!</p>
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </section>
+
                     </div>
+
+                    {{!-- Calendar of the volunteer's booked events --}}
+                    <section class="card dashboard-card calendar-card" id="calendar" aria-label="My event calendar">
+                        <div class="card-body">
+                            {{> calendar}}
+                        </div>
+                    </section>
+
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">My Current Signups</h5>
-                        <ul>
-                            <li>Event 1</li>
-                            <li>Event 2</li>
-                            <li>Event 3</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <br>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Event Calendar</h5>
-                        {{> calendar}}
-                    </div>
-                </div>
-            </div>
+            </main>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
