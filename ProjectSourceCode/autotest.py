@@ -128,7 +128,7 @@ def page_not_contains_keys(url: str, keys: list[str]):
 if __name__ == "__main__":
     startup()
     page_exists("http://localhost:3000/register")
-    register_api("http://localhost:3000/volunteers/register")
+    register_api("http://localhost:3000/register")
     page_contains_keys(
         "http://localhost:3000/volunteers/dashboard",
         [
