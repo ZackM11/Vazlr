@@ -14,7 +14,11 @@
                     </li>
                 </ul>
                 <div class="nav-item me-1">
-                    <a class="nav-link" href="/logout">Logout</a>
+					{{#if user}}
+					<form action="/logout" method="POST">
+						<button type="submit" name="logout" class="btn btn-sign-up rounded-3 py-2">Log out</button>
+					</form>
+					{{/if}}
                 </div>
             </div>
         </div>

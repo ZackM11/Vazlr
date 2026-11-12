@@ -22,9 +22,7 @@ const requireAuth = (req, res, next) => {
 router.get("/dashboard", requireAuth, (req, res) => {
 	console.log(req.session.user); /* Example of how to access user session cookie */
 	res.render("pages/minion-dash", {
-		user: {
-			name: req.session.user.email
-		}
+		user: req.session.user
 	});
 });
 

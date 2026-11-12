@@ -25,7 +25,6 @@
 
                 <div class="sidebar-actions">
                     <a class="btn btn-create-event rounded-3 py-2" href="#events">Find an event</a>
-                    <a class="btn btn-sign-up rounded-3 py-2" href="/logout">Log out</a>
                 </div>
             </aside>
 
@@ -35,7 +34,7 @@
                     {{!-- Welcome header --}}
                     <header class="mb-4">
                         <p class="eyebrow mb-1">Volunteer dashboard</p>
-                        <h1 class="welcome-title">Welcome back, {{#if user.name}}{{user.name}}{{else}}hero{{/if}} 🦸</h1>
+						<h1 class="welcome-title">Welcome back, {{#if user.email}}{{user.email}}{{else}}hero{{/if}} 🦸</h1>
                         <p class="welcome-copy mb-0">
                             You have {{myEvents.length}} upcoming {{#if myEvents.length}}signups{{else}}signups. Let's change that{{/if}}.
                             Every shift you take changes the world a little.
