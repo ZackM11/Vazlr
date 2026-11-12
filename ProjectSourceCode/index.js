@@ -98,6 +98,35 @@ app.get("/orgs-test", (req,res) => {
 	res.render("pages/org-dash");
 });
 
+router.post("/register", async (req, res) => {
+	const zod_result = userSchema.safeParse(req.body);
+
+	/* Invalid req.body fields */
+	if (!zod_result.success) {
+		return res.status(400).json({
+			message: "Failed to register user",
+			errors: zod_result.error.flatten().fieldErrors
+		});
+	}
+
+	/* Validated body, use this instead of req.body from here on */
+	const vbody = zod_result.data;
+	const hashed_pw = await bcrypt.hash(vbody.password, SALT_ROUNDS);
+	const query = `INSERT INTO users (email, password_hash, role)
+				 VALUES ('${vbody.email}', '${hashed_pw}', 'volunteer');`;
+
+	try {
+		let results = await db.any(query);
+		res.status(200).json({
+			data: "User successfully registered",
+		});
+	} catch (err) {
+		res.status(400).json({
+			error: err,
+		});
+	}
+});
+
 app.post("/login", async (req, res) => {
 	const zod_result = userSchema.safeParse(req.body);
 
