@@ -28,7 +28,11 @@ const userRegisterSchema = zod.object({
 	email: zod.string().email("Invalid user email"),
 	password: zod.string(),
 	confirm_password: zod.string(),
-	role: zod.string().regex(/^volunteer$|^organization$/) /* Will error if role is not volunteer or org */
+	role: zod
+		.string()
+		.regex(
+			/^volunteer$|^organization$/,
+		) /* Will error if role is not volunteer or org */,
 });
 
 /* Configure HBS */
@@ -91,7 +95,7 @@ app.get("/register", (req, res) => {
 });
 
 // Riley - Just for me to test my frontend dash - delete when necessary
-app.get("/orgs-test", (req,res) => {
+app.get("/orgs-test", (req, res) => {
 	res.render("pages/org-dash");
 });
 
@@ -100,8 +104,8 @@ app.post("/register", async (req, res) => {
 
 	/* Invalid req.body fields */
 	if (!zod_result.success) {
-		res.render('pages/register', {
-			error: 'Unable to register user'
+		res.render("pages/register", {
+			error: "Unable to register user",
 		});
 		return;
 	}
@@ -109,9 +113,9 @@ app.post("/register", async (req, res) => {
 	/* Validated body, use this instead of req.body from here on */
 	const vbody = zod_result.data;
 
-	if(vbody.password !== vbody.confirm_password) {
-		res.render('pages/register', {
-			error: 'Passwords don\'t match'
+	if (vbody.password !== vbody.confirm_password) {
+		res.render("pages/register", {
+			error: "Passwords don't match",
 		});
 		return;
 	}
@@ -128,16 +132,20 @@ app.post("/register", async (req, res) => {
 		res.status(400).json({
 			error: err,
 		});
+		console.log(`Failed to Register: ${err}`);
+		return;
 	}
 
 	/* Log user in */
 	req.session.user = user;
 	req.session.save();
 
+	console.log(user);
+
 	if (user.role === "volunteer") {
-		res.redirect('/volunteers/dashboard');
+		res.redirect("/volunteers/dashboard");
 	} else {
-		res.redirect('/orgs/dashboard');
+		res.redirect("/orgs/dashboard");
 	}
 });
 
@@ -147,7 +155,7 @@ app.post("/login", async (req, res) => {
 	if (!zod_result.success) {
 		return res.status(400).json({
 			message: "Failed to login user",
-			errors: zod_result.error.flatten().fieldErrors
+			errors: zod_result.error.flatten().fieldErrors,
 		});
 	}
 
@@ -158,29 +166,30 @@ app.post("/login", async (req, res) => {
 	try {
 		user = await db.one(getUserQuery);
 	} catch (err) {
-		res.render('pages/login', {
-			message: 'Unable to log user in'
+		res.render("pages/login", {
+			message: "Unable to log user in",
 		});
 		return;
 	}
 
 	const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
 
-	if (pwMatches) { /* Log user in */
+	if (pwMatches) {
+		/* Log user in */
 		delete user.password_hash; /* Don't need to store their pw hash */
 		req.session.user = user;
 		req.session.save();
 
 		if (user.role === "volunteer") {
-			res.redirect('/volunteers/dashboard');
+			res.redirect("/volunteers/dashboard");
 		} else {
-			res.redirect('/orgs/dashboard');
+			res.redirect("/orgs/dashboard");
 		}
 		return;
 	}
 
-	res.render('pages/login', {
-		message: 'Incorrect username/password'
+	res.render("pages/login", {
+		message: "Incorrect username/password",
 	});
 });
 
@@ -188,12 +197,12 @@ app.post("/logout", (req, res) => {
 	req.session.destroy((err) => {
 		if (err) {
 			return res.status(500).json({
-				message: 'Unable to log user out'
+				message: "Unable to log user out",
 			});
 		}
 
-		res.clearCookie('connect.sid');
-		res.redirect('/');
+		res.clearCookie("connect.sid");
+		res.redirect("/");
 	});
 });
 
