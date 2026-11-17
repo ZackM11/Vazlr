@@ -36,7 +36,7 @@ router.get("/login", (req, res) => {
 /* Get events for event calendar */
 router.get("/getEvents", async (req, res) => {
   const query = `SELECT organization_id, category_id, title, description, image_url,
-                    address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
+                    address, city, zip, start_time, end_time, capacity, status FROM events`;
 
   try {
     let results = await db.one(query);
@@ -113,9 +113,11 @@ router.post("/login", async (req, res) => {
 
     res.redirect("/orgs/dashboard");
   } else {
-    /* TODO: Render login page with incorrect pw error */
-    res.status(200).json({
-      error: "Incorrect email or password",
+    /* TODO: Render login page with incorrect pw error - Done (Vidita)*/
+    res.status(401).render("../views/pages/login", {
+    message: "Incorrect email or password",
+    error: true,
+    email: req.body.email,
     });
   }
 });

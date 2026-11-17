@@ -28,7 +28,8 @@ router.get("/dashboard", requireAuth, (req, res) => {
 
 /* Get events for event calendar */
 router.get("/getEvents", async (req, res) => {
-	const query = `SELECT * FROM events;`;
+	const query = `SELECT organization_id, category_id, title, description, image_url,
+                    address, city, zip, start_time, end_time, capacity, status FROM events;`; //don't need to display event id
 
 	try {
 		let results = await db.any(query);
