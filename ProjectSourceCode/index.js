@@ -16,6 +16,8 @@ const zod = require("zod"); // For post request body validation
 const minion_routes = require("./src/minion.js");
 const org_routes = require("./src/organizations.js");
 
+const pg_unique_violation = '23505'; /* Error code for insert query failing bc of duplicate data, source: https://www.postgresql.org/docs/10/errcodes-appendix.html */
+
 /* Global variables */
 const SALT_ROUNDS = 12;
 
@@ -115,7 +117,7 @@ app.post("/register", async (req, res) => {
 
 	if (vbody.password !== vbody.confirm_password) {
 		res.render("pages/register", {
-			error: "Passwords don't match",
+			error: "Passwords don't match.",
 		});
 		return;
 	}
@@ -129,6 +131,13 @@ app.post("/register", async (req, res) => {
 	try {
 		user = await db.one(query);
 	} catch (err) {
+		if (err.code === pg_unique_violation) {
+			res.render("pages/register", {
+				error: "Account already exists with that email.",
+			});
+			return;
+		}
+
 		res.status(400).json({
 			error: err,
 		});
