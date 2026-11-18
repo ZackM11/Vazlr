@@ -188,42 +188,44 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-	const zod_result = userSchema.safeParse(req.body);
+  const zod_result = userSchema.safeParse(req.body);
 
-	if (!zod_result.success) {
-		return res.status(400).json({
-			message: "Failed to login user",
-			errors: zod_result.error.flatten().fieldErrors,
-		});
-	}
+  if (!zod_result.success) {
+    return res.status(400).json({
+      message: "Failed to login user",
+      errors: zod_result.error.flatten().fieldErrors,
+    });
+  }
 
-	const vbody = zod_result.data;
-	const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
-	let user;
+  const vbody = zod_result.data;
+  const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
+  let user;
 
-	try {
-		user = await db.one(getUserQuery);
-	} catch (err) {
-		return res.status(400).json({
-			error: "Incorrect email or password",
-		});
-	}
+  try {
+    user = await db.one(getUserQuery);
+  } catch (err) {
+    return res.status(400).json({
+      error: "Incorrect email or password",
+    });
+  }
 
-	const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
+  const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
 
-	if (pwMatches) {
-		/* Log user in */
-		delete user.password_hash; /* Don't need to store their pw hash */
-		req.session.user = user;
-		req.session.save();
+  if (pwMatches) {
+    /* Log user in */
+    delete user.password_hash; /* Don't need to store their pw hash */
+    req.session.user = user;
+    req.session.save();
 
-		res.redirect("/orgs/dashboard");
-	} else {
-		/* TODO: Render login page with incorrect pw error */
-		res.status(200).json({
-			error: "Incorrect email or password",
-		});
-	}
+    res.redirect("/orgs/dashboard");
+  } else {
+    /* TODO: Render login page with incorrect pw error - Done (Vidita)*/
+    res.status(401).render("../views/pages/login", {
+    message: "Incorrect email or password",
+    error: true,
+    email: req.body.email,
+    });
+  }
 });
 
 router.get("/dashboard", async (req, res) => {
