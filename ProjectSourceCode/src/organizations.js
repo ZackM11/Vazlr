@@ -12,6 +12,39 @@ const zod = require("zod"); // For post request body validation
 const router = express.Router();
 const db = require("./db.js");
 
+// (AI-generated) The organization ID is the logged-in user's ID (organizations.user_id), NOT
+// a value that the browser is allowed to choose.
+function requireOrganization(req, res, next) {
+	const user = req.session && req.session.user;
+	if (!user) {
+		if (req.path === "/dashboard") {
+			return res.redirect("/orgs/login");
+		}
+		return res
+			.status(401)
+			.json({ message: "Log in as an organization to continue." });
+	}
+	if (user.role !== "organization") {
+		return res
+			.status(403)
+			.json({ message: "Only organization accounts can manage events." });
+	}
+	next();
+}
+const createEventSchema = zod.object({
+	eventName: zod.string().trim().min(1).max(150),
+	eventDescription: zod.string().trim().min(1),
+	eventAddress: zod.string().trim().min(1),
+	eventCity: zod.string().trim().min(1),
+	eventZip: zod.string().trim().min(1).max(10),
+	//eventStart: zod.string().datetime({ offset: true }),
+	//eventEnd: zod.string().datetime({ offset: true }),
+	eventCapacity: zod.coerce.number().int().positive().max(2147483647),
+	//eventCategory: zod.coerce.number().int().positive(),
+	eventImage: zod.union([zod.literal(""), zod.string().url()]).optional(),
+	eventStatus: zod.enum(["open", "cancelled"]).default("open"),
+});
+
 router.get("/testing", (req, res) => {
 	res.send("You are a generous philanthropist");
 });
@@ -57,6 +90,73 @@ router.get("/getEvents", async (req, res) => {
 });
 
 // Add listings
+router.post("/events", requireOrganization, async (req, res) => {
+	const zod_result = createEventSchema.safeParse(req.body);
+
+	if (!zod_result.success) {
+		return res.status(400).json({
+			message: "Please correct the event fields and try again.",
+			errors: zod_result.error.flatten().fieldErrors,
+		});
+	}
+
+	const vbody = zod_result.data;
+	const organizationId = req.session.user.id;
+
+	try {
+		// The user's role and an actual organizations row are both required.
+		const organization = await db.oneOrNone(
+			"SELECT user_id FROM organizations WHERE user_id = $1", //TODO: fix db query
+			[organizationId],
+		);
+		if (!organization) {
+			return res
+				.status(403)
+				.json({ message: "Your account has no organization profile." });
+		}
+
+		const category = await db.oneOrNone(
+			"SELECT id FROM categories WHERE id = $1",
+			[vbody.eventCategory],
+		);
+		if (!category) {
+			return res
+				.status(400)
+				.json({ message: "Select a valid event category." });
+		}
+
+		const query = `INSERT INTO events
+			(organization_id, category_id, title, description, image_url,
+			 address, city, zip, start_time, end_time, capacity, status)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+			RETURNING id, organization_id, category_id, title, description, image_url,
+					  address, city, zip, start_time, end_time, capacity, status`;
+
+		const newEvent = await db.one(query, [
+			organizationId,
+			67, //vbody.eventCategory,
+			vbody.eventName,
+			vbody.eventDescription,
+			vbody.eventImage || null,
+			vbody.eventAddress,
+			vbody.eventCity,
+			vbody.eventZip,
+			"06:07", //vbody.eventStart,
+			"06:07", //vbody.eventEnd,
+			vbody.eventCapacity,
+			vbody.eventStatus,
+		]);
+
+		return res
+			.status(201)
+			.json({ message: "Event created successfully.", data: newEvent });
+	} catch (err) {
+		console.error("Error creating event:", err);
+		return res
+			.status(500)
+			.json({ message: "Unable to create the event. Please try again." });
+	}
+});
 
 router.post("/register", async (req, res) => {
 	const zod_result = userSchema.safeParse(req.body);
