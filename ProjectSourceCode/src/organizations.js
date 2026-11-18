@@ -66,8 +66,11 @@ router.get("/getEvents", async (req, res) => {
 	// TODO: Put a query here that gets the org id from the email
 
 	// TODO: Make this query only return events from the logged-in organization
-	const query = `SELECT organization_id, category_id, title, description, image_url,
-                    address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
+	const query = `SELECT title, description, image_url,
+                    address, city, zip, start_time, end_time, capacity, status 
+                    FROM events
+                    INNER JOIN organzations
+                    events.organization_id = organizations.organization_id`; //TODO: Put events query here
 
 	try {
 		let results = await db.one(query);
