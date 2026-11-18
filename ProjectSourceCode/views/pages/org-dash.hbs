@@ -1,195 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Organization Dashboard | Vazlr</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+			crossorigin="anonymous"
+		/>
+		<link href="/css/dashboard.css" rel="stylesheet" />
+	</head>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Organization Dashboard | Vazlr</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link href="/css/dashboard.css" rel="stylesheet">
-</head>
+	<body class="dashboard-page">
+		<div class="container-fluid p-0">
+			<div class="row g-0 dashboard-shell">
+				<aside
+					class="col-md-3 col-xl-2 dashboard-sidebar"
+					aria-label="Organization dashboard navigation"
+				>
+					<p class="sidebar-label">Workspace</p>
+					<nav class="d-grid gap-1">
+						<a class="sidebar-link" href="#events">Events</a>
+						<a class="sidebar-link" href="#volunteers"
+							>Volunteers</a
+						>
+						<a class="sidebar-link" href="#calendar">Calendar</a>
+					</nav>
 
-<body class="dashboard-page">
-    <div class="container-fluid p-0">
-        <div class="row g-0 dashboard-shell">
-            <aside class="col-md-3 col-xl-2 dashboard-sidebar" aria-label="Organization dashboard navigation">
-                <p class="sidebar-label">Workspace</p>
-                <nav class="d-grid gap-1">
-                    <a class="sidebar-link" href="#events">Events</a>
-                    <a class="sidebar-link" href="#volunteers">Volunteers</a>
-                    <a class="sidebar-link" href="#calendar">Calendar</a>
-                </nav>
+					<div class="sidebar-actions">
+						<button
+							class="btn btn-create-event rounded-3 py-2"
+							type="button"
+							data-bs-toggle="modal"
+							data-bs-target="#createEventModal"
+						>
+							Create event
+						</button>
+					</div>
+				</aside>
 
-                <div class="sidebar-actions">
-                    <button class="btn btn-create-event rounded-3 py-2" type="button" data-bs-toggle="modal"
-                        data-bs-target="#createEventModal">
-                        Create event
-                    </button>
-                </div>
-            </aside>
+				<main class="col-md-9 col-xl-10">
+					<div class="dashboard-main">
+						<header class="mb-4 mb-lg-5">
+							<p class="eyebrow mb-1">Organization dashboard</p>
+							<h1 class="welcome-title">
+								Welcome back, organizer
+							</h1>
+							<p class="welcome-copy mb-0">
+								Keep your community events and volunteers moving
+								forward.
+							</p>
+						</header>
 
-            <main class="col-md-9 col-xl-10">
-                <div class="dashboard-main">
-                    <header class="mb-4 mb-lg-5">
-                        <p class="eyebrow mb-1">Organization dashboard</p>
-                        <h1 class="welcome-title">Welcome back, organizer</h1>
-                        <p class="welcome-copy mb-0">Keep your community events and volunteers moving forward.</p>
-                    </header>
+						<div class="row g-3 g-lg-4 mb-3 mb-lg-4">
+							<section
+								class="col-lg-6"
+								id="events"
+								aria-labelledby="events-title"
+							>
+								<div class="card dashboard-card">
+									<div class="card-body">
+										<div
+											class="d-flex justify-content-between align-items-start mb-2"
+										>
+											<div>
+												<h2
+													class="section-title"
+													id="events-title"
+												>
+													Event list
+												</h2>
+												<p
+													class="section-subtitle small mb-0 mt-1"
+												>
+													Your upcoming community
+													events
+												</p>
+											</div>
+											<span
+												class="badge rounded-pill text-bg-light"
+												>3 events</span
+											>
+										</div>
+										<ul class="list-group list-group-flush">
+											<li class="list-group-item">
+												<span
+													class="list-indicator"
+													aria-hidden="true"
+												></span
+												>Event 1
+												<span
+													class="list-meta float-end"
+													>Upcoming</span
+												>
+											</li>
+											<li class="list-group-item">
+												<span
+													class="list-indicator"
+													aria-hidden="true"
+												></span
+												>Event 2
+												<span
+													class="list-meta float-end"
+													>Upcoming</span
+												>
+											</li>
+											<li class="list-group-item">
+												<span
+													class="list-indicator"
+													aria-hidden="true"
+												></span
+												>Event 3
+												<span
+													class="list-meta float-end"
+													>Upcoming</span
+												>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</section>
 
-                    <div class="row g-3 g-lg-4 mb-3 mb-lg-4">
-                        <section class="col-lg-6" id="events" aria-labelledby="events-title">
-                            <div class="card dashboard-card">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h2 class="section-title" id="events-title">Event list</h2>
-                                            <p class="section-subtitle small mb-0 mt-1">Your upcoming community events
-                                            </p>
-                                        </div>
-                                        <span class="badge rounded-pill text-bg-light">3 events</span>
-                                    </div>
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">
-                                            <span class="list-indicator" aria-hidden="true"></span>Event 1
-                                            <span class="list-meta float-end">Upcoming</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <span class="list-indicator" aria-hidden="true"></span>Event 2
-                                            <span class="list-meta float-end">Upcoming</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <span class="list-indicator" aria-hidden="true"></span>Event 3
-                                            <span class="list-meta float-end">Upcoming</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </section>
+							<section
+								class="col-lg-6"
+								id="volunteers"
+								aria-labelledby="volunteers-title"
+							>
+								<div class="card dashboard-card">
+									<div class="card-body">
+										<div
+											class="d-flex justify-content-between align-items-start mb-2"
+										>
+											<div>
+												<h2
+													class="section-title"
+													id="volunteers-title"
+												>
+													Volunteer signups
+												</h2>
+												<p
+													class="section-subtitle small mb-0 mt-1"
+												>
+													People supporting your
+													events
+												</p>
+											</div>
+											<span
+												class="badge rounded-pill text-bg-light"
+												>3 volunteers</span
+											>
+										</div>
+										<ul class="list-group list-group-flush">
+											<li class="list-group-item">
+												<span
+													class="list-indicator"
+													aria-hidden="true"
+												></span
+												>User 1
+												<span
+													class="list-meta float-end"
+													>Signed up</span
+												>
+											</li>
+											<li class="list-group-item">
+												<span
+													class="list-indicator"
+													aria-hidden="true"
+												></span
+												>User 2
+												<span
+													class="list-meta float-end"
+													>Signed up</span
+												>
+											</li>
+											<li class="list-group-item">
+												<span
+													class="list-indicator"
+													aria-hidden="true"
+												></span
+												>User 3
+												<span
+													class="list-meta float-end"
+													>Signed up</span
+												>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</section>
+						</div>
 
-                        <section class="col-lg-6" id="volunteers" aria-labelledby="volunteers-title">
-                            <div class="card dashboard-card">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h2 class="section-title" id="volunteers-title">Volunteer signups</h2>
-                                            <p class="section-subtitle small mb-0 mt-1">People supporting your events
-                                            </p>
-                                        </div>
-                                        <span class="badge rounded-pill text-bg-light">3 volunteers</span>
-                                    </div>
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">
-                                            <span class="list-indicator" aria-hidden="true"></span>User 1
-                                            <span class="list-meta float-end">Signed up</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <span class="list-indicator" aria-hidden="true"></span>User 2
-                                            <span class="list-meta float-end">Signed up</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <span class="list-indicator" aria-hidden="true"></span>User 3
-                                            <span class="list-meta float-end">Signed up</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
+						<section
+							class="card dashboard-card calendar-card"
+							id="calendar"
+							aria-label="Event calendar"
+						>
+							<div class="card-body">{{> calendar}}</div>
+						</section>
+					</div>
+				</main>
+			</div>
+		</div>
 
-                    <section class="card dashboard-card calendar-card" id="calendar" aria-label="Event calendar">
-                        <div class="card-body">
-                            {{> calendar}}
-                        </div>
-                    </section>
-                </div>
-            </main>
-        </div>
-    </div>
+		<div
+			class="modal fade"
+			id="createEventModal"
+			tabindex="-1"
+			aria-labelledby="createEventModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content border-0 rounded-4">
+					<div class="modal-header border-0 pb-0">
+						<h2
+							class="modal-title fs-5 fw-bold"
+							id="createEventModalLabel"
+						>
+							Create an event
+						</h2>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div class="modal-body pt-2">
+						<h1 class="modal-title fs-4 fw-bold mb-3">
+							Create an event
+						</h1>
+						<form
+							id="createEventForm"
+							action="/orgs/events"
+							method="post"
+						>
+							<div class="mb-3">
+								<label for="eventName" class="form-label"
+									>Event Title</label
+								>
+								<input
+									type="text"
+									class="form-control"
+									id="eventName"
+									name="eventName"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventDate" class="form-label"
+									>Event Date</label
+								>
+								<input
+									type="date"
+									class="form-control"
+									id="eventDate"
+									name="eventDate"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventDescription" class="form-label"
+									>Event Description</label
+								>
+								<textarea
+									class="form-control"
+									id="eventDescription"
+									name="eventDescription"
+									rows="3"
+								></textarea>
+							</div>
+							<div class="mb-3">
+								<label for="eventLocation" class="form-label"
+									>Address</label
+								>
+								<input
+									type="text"
+									class="form-control"
+									id="eventAddress"
+									name="eventAddress"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventTime" class="form-label"
+									>City</label
+								>
+								<input
+									type="text"
+									class="form-control"
+									id="eventCity"
+									name="eventCity"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventTime" class="form-label"
+									>Zip Code</label
+								>
+								<input
+									type="text"
+									class="form-control"
+									id="eventZip"
+									name="eventZip"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventTime" class="form-label"
+									>Start Time</label
+								>
+								<input
+									type="time"
+									class="form-control"
+									id="eventTime"
+									name="eventTime"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventEndTime" class="form-label"
+									>End Time</label
+								>
+								<input
+									type="time"
+									class="form-control"
+									id="eventEndTime"
+									name="eventEndTime"
+									required
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventCapacity" class="form-label"
+									>Capacity</label
+								>
+								<input
+									type="number"
+									class="form-control"
+									id="eventCapacity"
+									name="eventCapacity"
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventCategory" class="form-label"
+									>Category</label
+								>
+								<select
+									class="form-select"
+									id="eventCategory"
+									name="eventCategory"
+									required
+								>
+									<option value="" disabled selected>
+										Select a category
+									</option>
+									<option value="community">Community</option>
+									<option value="education">Education</option>
+									<option value="health">Health</option>
+									<option value="environment">
+										Environment
+									</option>
+									<option value="arts">Arts & Culture</option>
+								</select>
+							</div>
+							<div class="mb-3">
+								<label for="eventImage" class="form-label"
+									>Event Image URL</label
+								>
+								<input
+									type="url"
+									class="form-control"
+									id="eventImage"
+									name="eventImage"
+									accept="image/*"
+								/>
+							</div>
+							<div class="mb-3">
+								<label for="eventLink" class="form-label"
+									>Status</label
+								>
+								<select
+									class="form-select"
+									id="eventLink"
+									name="eventLink"
+									required
+								>
+									<option value="active">Active</option>
+									<option value="inactive">Inactive</option>
+								</select>
+							</div>
+							<button
+								type="submit"
+								class="btn btn-primary rounded-3 px-4"
+							>
+								Create Event
+							</button>
+						</form>
+					</div>
+					<div class="modal-footer border-0 pt-0">
+						<button
+							type="button"
+							class="btn btn-dark rounded-3 px-4"
+							data-bs-dismiss="modal"
+						>
+							Close
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    <div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h2 class="modal-title fs-5 fw-bold" id="createEventModalLabel">Create an event</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body pt-2">
-                    <h1 class="modal-title fs-4 fw-bold mb-3">Create an event</h1>
-                    <form id="createEventForm">
-                        <div class="mb-3">
-                            <label for="eventName" class="form-label">Event Title</label>
-                            <input type="text" class="form-control" id="eventName" name="eventName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventDate" class="form-label">Event Date</label>
-                            <input type="date" class="form-control" id="eventDate" name="eventDate" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventDescription" class="form-label">Event Description</label>
-                            <textarea class="form-control" id="eventDescription" name="eventDescription"
-                                rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventLocation" class="form-label">Address</label>
-                            <input type="text" class="form-control" id="eventAddress" name="eventAddress" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventTime" class="form-label">City</label>
-                            <input type="text" class="form-control" id="eventCity" name="eventCity" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventTime" class="form-label">Zip Code</label>
-                            <input type="text" class="form-control" id="eventZip" name="eventZip" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventTime" class="form-label">Start Time</label>
-                            <input type="time" class="form-control" id="eventTime" name="eventTime" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventEndTime" class="form-label">End Time</label>
-                            <input type="time" class="form-control" id="eventEndTime" name="eventEndTime" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventCapacity" class="form-label">Capacity</label>
-                            <input type="number" class="form-control" id="eventCapacity" name="eventCapacity">
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventCategory" class="form-label">Category</label>
-                            <select class="form-select" id="eventCategory" name="eventCategory" required>
-                                <option value="" disabled selected>Select a category</option>
-                                <option value="community">Community</option>
-                                <option value="education">Education</option>
-                                <option value="health">Health</option>
-                                <option value="environment">Environment</option>
-                                <option value="arts">Arts & Culture</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventImage" class="form-label">Event Image URL</label>
-                            <input type="url" class="form-control" id="eventImage" name="eventImage" accept="image/*">
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventLink" class="form-label">Status</label>
-                            <select class="form-select" id="eventLink" name="eventLink" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary rounded-3 px-4">Create Event</button>
-                    </form>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-dark rounded-3 px-4" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
-</body>
-
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+			crossorigin="anonymous"
+		></script>
+	</body>
 </html>
