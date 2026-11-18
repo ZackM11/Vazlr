@@ -81,13 +81,20 @@
                                                         <div>
                                                             <div class="fw-semibold">
                                                                 <span class="list-indicator" aria-hidden="true"></span>{{this.title}}
-                                                                {{#if this.cause}}
-                                                                    <span class="badge rounded-pill text-bg-light ms-1">{{this.cause}}</span>
+                                                                {{#if this.description}}
+																	<p class="small text-body-secondary">{{this.description}}</p>
                                                                 {{/if}}
                                                             </div>
-                                                            <div class="list-meta mt-1">
-                                                                {{this.date}}{{#if this.time}} at {{this.time}}{{/if}} · {{this.location}}
-                                                            </div>
+															{{#if this.start_time}}
+																<div class="list-meta mt-1">
+																	Start: {{this.start_time}}
+																</div>
+															{{/if}}
+															{{#if this.end_time}}
+																<div class="list-meta mt-1">
+																	End: {{this.end_time}}
+																</div>
+															{{/if}}
                                                             <div class="list-meta">
                                                                 {{this.org_name}}
                                                                 {{#if this.verified}}<span class="text-success fw-semibold">✓ Verified</span>{{/if}}
