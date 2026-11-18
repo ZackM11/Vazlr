@@ -63,14 +63,6 @@ const userSchema = zod.object({
 	password: zod.string(),
 });
 
-router.get("/register", (req, res) => {
-	res.render("pages/register");
-});
-
-router.get("/login", (req, res) => {
-	res.render("pages/login");
-});
-
 /* Get events for event calendar */
 router.get("/getEvents", async (req, res) => {
 	const zod_result = userSchema.safeParse(req.body);
@@ -159,76 +151,6 @@ router.post("/events", requireOrganization, async (req, res) => {
 			.status(500)
 			.json({ message: "Unable to create the event. Please try again." });
 	}
-});
-
-router.post("/register", async (req, res) => {
-	const zod_result = userSchema.safeParse(req.body);
-
-	/* Invalid req.body fields */
-	if (!zod_result.success) {
-		return res.status(400).json({
-			message: "Failed to register user",
-			errors: zod_result.error.flatten().fieldErrors,
-		});
-	}
-
-	/* Validated body, use this instead of req.body from here on */
-	const vbody = zod_result.data;
-	const hashed_pw = await bcrypt.hash(vbody.password, SALT_ROUNDS);
-	const query = `INSERT INTO users (email, password_hash, role)
-                 VALUES ('${vbody.email}', '${hashed_pw}', 'volunteer');`;
-
-	try {
-		let results = await db.any(query);
-		res.status(200).json({
-			data: "User successfully registered",
-		});
-	} catch (err) {
-		res.status(400).json({
-			error: err,
-		});
-	}
-});
-
-router.post("/login", async (req, res) => {
-  const zod_result = userSchema.safeParse(req.body);
-
-  if (!zod_result.success) {
-    return res.status(400).json({
-      message: "Failed to login user",
-      errors: zod_result.error.flatten().fieldErrors,
-    });
-  }
-
-  const vbody = zod_result.data;
-  const getUserQuery = `SELECT * FROM users WHERE email = '${vbody.email}';`;
-  let user;
-
-  try {
-    user = await db.one(getUserQuery);
-  } catch (err) {
-    return res.status(400).json({
-      error: "Incorrect email or password",
-    });
-  }
-
-  const pwMatches = await bcrypt.compare(vbody.password, user.password_hash);
-
-  if (pwMatches) {
-    /* Log user in */
-    delete user.password_hash; /* Don't need to store their pw hash */
-    req.session.user = user;
-    req.session.save();
-
-    res.redirect("/orgs/dashboard");
-  } else {
-    /* TODO: Render login page with incorrect pw error - Done (Vidita)*/
-    res.status(401).render("../views/pages/login", {
-    message: "Incorrect email or password",
-    error: true,
-    email: req.body.email,
-    });
-  }
 });
 
 router.get("/dashboard", async (req, res) => {
