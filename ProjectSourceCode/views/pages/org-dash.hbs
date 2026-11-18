@@ -133,40 +133,36 @@
 						Create an event
 					</h1>
 					<form id="createEventForm" action="/orgs/events" method="post">
+						<div id="createEventFeedback" class="alert d-none" role="alert" aria-live="polite"></div>
 						<div class="mb-3">
 							<label for="eventName" class="form-label">Event Title</label>
 							<input type="text" class="form-control" id="eventName" name="eventName" required />
 						</div>
-						<!--
 						<div class="mb-3">
-							<label for="eventDate" class="form-label">Event Date</label>
-							<input type="date" class="form-control" id="eventDate" name="eventDate" required />
+							<label for="eventStart" class="form-label">Start Date and Time</label>
+							<input type="datetime-local" class="form-control" id="eventStart" name="eventStart"
+								required />
 						</div>
-						-->
 						<div class="mb-3">
 							<label for="eventDescription" class="form-label">Event Description</label>
 							<textarea class="form-control" id="eventDescription" name="eventDescription" rows="3"
 								required></textarea>
 						</div>
 						<div class="mb-3">
-							<label for="eventLocation" class="form-label">Address</label>
+							<label for="eventAddress" class="form-label">Address</label>
 							<input type="text" class="form-control" id="eventAddress" name="eventAddress" required />
 						</div>
 						<div class="mb-3">
-							<label for="eventTime" class="form-label">City</label>
+							<label for="eventCity" class="form-label">City</label>
 							<input type="text" class="form-control" id="eventCity" name="eventCity" required />
 						</div>
 						<div class="mb-3">
-							<label for="eventTime" class="form-label">Zip Code</label>
+							<label for="eventZip" class="form-label">Zip Code</label>
 							<input type="text" class="form-control" id="eventZip" name="eventZip" required />
 						</div>
 						<div class="mb-3">
-							<label for="eventTime" class="form-label">Start Time</label>
-							<input type="time" class="form-control" id="eventTime" name="eventTime" required />
-						</div>
-						<div class="mb-3">
-							<label for="eventEndTime" class="form-label">End Time</label>
-							<input type="time" class="form-control" id="eventEndTime" name="eventEndTime" required />
+							<label for="eventEnd" class="form-label">End Date and Time</label>
+							<input type="datetime-local" class="form-control" id="eventEnd" name="eventEnd" required />
 						</div>
 						<div class="mb-3">
 							<label for="eventCapacity" class="form-label">Capacity</label>
@@ -184,24 +180,23 @@
 								<option value="3">Education</option>
 								<option value="4">Animal Welfare</option>
 								<option value="5">Health & Wellness</option>
-								<option value="6">Community Development</option>
+								<option value="6">Community</option>
 								<option value="7">Arts & Culture</option>
 								<option value="8">Seniors</option>
 							</select>
 						</div>
 						<div class="mb-3">
-							<label for="eventImage" class="form-label">Event Image URL</label>
-							<input type="url" class="form-control" id="eventImage" name="eventImage" accept="image/*"
-								required />
+							<label for="eventImage" class="form-label">Event Image URL (optional)</label>
+							<input type="url" class="form-control" id="eventImage" name="eventImage" />
 						</div>
 						<div class="mb-3">
-							<label for="eventLink" class="form-label">Status</label>
-							<select class="form-select" id="eventLink" name="eventLink" required>
-								<option value="active">Active</option>
-								<option value="inactive">Inactive</option>
+							<label for="eventStatus" class="form-label">Status</label>
+							<select class="form-select" id="eventStatus" name="eventStatus" required>
+								<option value="open">Open</option>
+								<option value="cancelled">Cancelled</option>
 							</select>
 						</div>
-						<button type="submit" class="btn btn-primary rounded-3 px-4">
+						<button id="createEventSubmit" type="submit" class="btn btn-primary rounded-3 px-4">
 							Create Event
 						</button>
 					</form>
@@ -218,6 +213,63 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
 		crossorigin="anonymous"></script>
+	<script>
+		const createEventForm = document.getElementById("createEventForm");
+		const createEventFeedback = document.getElementById("createEventFeedback");
+		const createEventSubmit = document.getElementById("createEventSubmit");
+		const eventStart = document.getElementById("eventStart");
+		const eventEnd = document.getElementById("eventEnd");
+
+		eventStart.addEventListener("change", () => {
+			eventEnd.min = eventStart.value;
+		});
+
+		createEventForm.addEventListener("submit", async (event) => {
+			event.preventDefault();
+			createEventFeedback.className = "alert d-none";
+			createEventFeedback.textContent = "";
+			createEventSubmit.disabled = true;
+
+			try {
+				const formData = new FormData(createEventForm);
+				for (const fieldName of ["eventStart", "eventEnd"]) {
+					const localDateTime = formData.get(fieldName);
+					if (typeof localDateTime !== "string" || !localDateTime) {
+						throw new Error("Enter both the event start and end times.");
+					}
+
+					formData.set(fieldName, new Date(localDateTime).toISOString());
+				}
+
+				const response = await fetch(createEventForm.action, {
+					method: createEventForm.method,
+					headers: {
+						"Accept": "application/json",
+						"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+					},
+					body: new URLSearchParams(formData),
+				});
+				const result = await response.json();
+
+				if (!response.ok) {
+					const fieldErrors = Object.values(result.errors || {}).flat();
+					throw new Error(fieldErrors.join(" ") || result.message || "Unable to create the event.");
+				}
+
+				createEventFeedback.className = "alert alert-success";
+				createEventFeedback.textContent = result.message || "Event created successfully.";
+				createEventForm.reset();
+				eventEnd.removeAttribute("min");
+			} catch (error) {
+				createEventFeedback.className = "alert alert-danger";
+				createEventFeedback.textContent = error instanceof Error
+					? error.message
+					: "Unable to create the event. Please try again.";
+			} finally {
+				createEventSubmit.disabled = false;
+			}
+		});
+	</script>
 </body>
 
 </html>

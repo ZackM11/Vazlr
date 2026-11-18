@@ -37,13 +37,17 @@ const createEventSchema = zod.object({
 	eventAddress: zod.string().trim().min(1),
 	eventCity: zod.string().trim().min(1),
 	eventZip: zod.string().trim().min(1).max(10),
-	//eventStart: zod.string().datetime({ offset: true }),
-	//eventEnd: zod.string().datetime({ offset: true }),
+	eventStart: zod.string().datetime({ offset: true }),
+	eventEnd: zod.string().datetime({ offset: true }),
 	eventCapacity: zod.coerce.number().int().positive().max(2147483647),
-	//eventCategory: zod.coerce.number().int().positive(),
+	eventCategory: zod.coerce.number().int().positive(),
 	eventImage: zod.union([zod.literal(""), zod.string().url()]).optional(),
 	eventStatus: zod.enum(["open", "cancelled"]).default("open"),
-});
+}).refine(
+	({ eventStart, eventEnd }) =>
+		new Date(eventEnd).getTime() > new Date(eventStart).getTime(),
+	{ path: ["eventEnd"], message: "End time must be after start time." },
+);
 
 router.get("/testing", (req, res) => {
 	res.send("You are a generous philanthropist");
@@ -133,15 +137,15 @@ router.post("/events", requireOrganization, async (req, res) => {
 
 		const newEvent = await db.one(query, [
 			organizationId,
-			67, //vbody.eventCategory,
+			category.id,
 			vbody.eventName,
 			vbody.eventDescription,
 			vbody.eventImage || null,
 			vbody.eventAddress,
 			vbody.eventCity,
 			vbody.eventZip,
-			"06:07", //vbody.eventStart,
-			"06:07", //vbody.eventEnd,
+			vbody.eventStart,
+			vbody.eventEnd,
 			vbody.eventCapacity,
 			vbody.eventStatus,
 		]);
