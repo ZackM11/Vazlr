@@ -77,9 +77,9 @@ router.get("/getEvents", async (req, res) => {
                     events.organization_id = organizations.organization_id`; //TODO: Put events query here
 
 	try {
-		let results = await db.one(query);
-		res.status(200).json({
-			data: results,
+		let events = await db.one(query);
+		res.render("pages/org-dash", {
+			events,
 		});
 	} catch (err) {
 		res.status(400).json({
@@ -173,11 +173,14 @@ router.post("/events", requireOrganization, async (req, res) => {
 router.get("/getVolunteers", async (req, res) => {
 	const organizationId = req.session.user.id;
 
-	const query = `SELECT users.id, users.first_name, users.last_name, users.email, events.title AS event_title
-				   FROM users
-				   JOIN event_volunteers ON users.id = event_volunteers.user_id
-				   JOIN events ON event_volunteers.event_id = events.id
-				   WHERE events.organization_id = $1`;
+	const query = `SELECT volunteers.first_name, volunteers.last_name,
+						  events.title AS event_title, bookings.status
+				   FROM bookings
+				   JOIN volunteers ON volunteers.user_id = bookings.volunteer_id
+				   JOIN events ON events.id = bookings.event_id
+				   WHERE events.organization_id = $1
+					 AND bookings.status != 'cancelled'
+				   ORDER BY events.start_time, volunteers.last_name, volunteers.first_name`;
 
 	let results;
 	try {
@@ -189,20 +192,32 @@ router.get("/getVolunteers", async (req, res) => {
 		});
 		return;
 	}
-	console.log(results);
 	res.render("pages/org-dash", {
-		results,
+		volunteers: results,
+		showAllVolunteers: results.length > 5,
 	});
 });
 
 router.get("/dashboard", async (req, res) => {
 	const organizationId = req.session.user.id;
-	const query = `SELECT organization_id, category_id, title, description, image_url,
-                    address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
+	const query = `SELECT id, organization_id, category_id, title, description, image_url,
+                    address, city, zip, start_time, end_time, capacity, status
+				   FROM events
+				   WHERE organization_id = $1
+				   ORDER BY start_time`;
+	const volunteerQuery = `SELECT volunteers.first_name, volunteers.last_name,
+								   events.title AS event_title, bookings.status
+							FROM bookings
+							JOIN volunteers ON volunteers.user_id = bookings.volunteer_id
+							JOIN events ON events.id = bookings.event_id
+							WHERE events.organization_id = $1
+							  AND bookings.status != 'cancelled'
+							ORDER BY events.start_time, volunteers.last_name, volunteers.first_name`;
 
-	let results;
+	let events, volunteers;
 	try {
-		results = await db.any(query);
+		events = await db.any(query, [organizationId]);
+		volunteers = await db.any(volunteerQuery, [organizationId]);
 	} catch (err) {
 		console.log(`Error in getting events: ${err}`);
 		res.status(400).json({
@@ -210,10 +225,11 @@ router.get("/dashboard", async (req, res) => {
 		});
 		return;
 	}
-	console.log(results);
-
 	res.render("pages/org-dash", {
-		results,
+		events,
+		showAllEvents: events.length > 5,
+		volunteers,
+		showAllVolunteers: volunteers.length > 5,
 	});
 });
 

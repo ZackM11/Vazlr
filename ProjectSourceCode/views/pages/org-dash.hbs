@@ -56,22 +56,26 @@
 												events
 											</p>
 										</div>
-										<span class="badge rounded-pill text-bg-light">3 events</span>
+										<span class="badge rounded-pill text-bg-light">{{events.length}} events</span>
 									</div>
 									<ul class="list-group list-group-flush">
-										<li class="list-group-item">
-											<span class="list-indicator" aria-hidden="true"></span>Event 1
-											<span class="list-meta float-end">Upcoming</span>
+										{{#each events}}
+										<li class="list-group-item event-item">
+											<span class="list-indicator" aria-hidden="true"></span>{{title}}
+											<span class="list-meta float-end">{{status}}</span>
 										</li>
-										<li class="list-group-item">
-											<span class="list-indicator" aria-hidden="true"></span>Event 2
-											<span class="list-meta float-end">Upcoming</span>
+										{{else}}
+										<li class="list-group-item list-meta">
+											You have no events yet.
 										</li>
-										<li class="list-group-item">
-											<span class="list-indicator" aria-hidden="true"></span>Event 3
-											<span class="list-meta float-end">Upcoming</span>
-										</li>
+										{{/each}}
 									</ul>
+									{{#if showAllEvents}}
+									<button id="showAllEvents" class="btn btn-link px-0 mt-2" type="button"
+										aria-expanded="false">
+										Show all {{events.length}}
+									</button>
+									{{/if}}
 								</div>
 							</div>
 						</section>
@@ -89,23 +93,26 @@
 												events
 											</p>
 										</div>
-										<span class="badge rounded-pill text-bg-light">3 volunteers</span>
+										<span class="badge rounded-pill text-bg-light">{{volunteers.length}} volunteers</span>
 									</div>
-									{{#each volunteers}}
 									<ul class="list-group list-group-flush">
+										{{#each volunteers}}
 										<li class="list-group-item">
-											<span class="list-indicator" aria-hidden="true"></span>User 1
-											<span class="list-meta float-end">Signed up</span>
+											<span class="volunteer-signup" data-volunteer-index="{{@index}}">
+												<span class="list-indicator" aria-hidden="true"></span>{{first_name}} {{last_name}}
+												<span class="list-meta float-end">{{event_title}}</span>
+											</span>
 										</li>
-										<li class="list-group-item">
-											<span class="list-indicator" aria-hidden="true"></span>User 2
-											<span class="list-meta float-end">Signed up</span>
-										</li>
-										<li class="list-group-item">
-											<span class="list-indicator" aria-hidden="true"></span>User 3
-											<span class="list-meta float-end">Signed up</span>
-										</li>
+										{{else}}
+										<li class="list-group-item list-meta">No volunteers have signed up yet.</li>
+										{{/each}}
 									</ul>
+									{{#if showAllVolunteers}}
+									<button id="showAllVolunteers" class="btn btn-link px-0 mt-2" type="button"
+										aria-expanded="false">
+										Show all {{volunteers.length}}
+									</button>
+									{{/if}}
 								</div>
 							</div>
 						</section>
@@ -220,6 +227,52 @@
 		const createEventSubmit = document.getElementById("createEventSubmit");
 		const eventStart = document.getElementById("eventStart");
 		const eventEnd = document.getElementById("eventEnd");
+		const showAllEvents = document.getElementById("showAllEvents");
+		const eventItems = document.querySelectorAll(".event-item");
+		const showAllVolunteers = document.getElementById("showAllVolunteers");
+		const volunteerSignups = document.querySelectorAll(".volunteer-signup");
+
+		if (showAllEvents) {
+			eventItems.forEach((item, index) => {
+				if (index >= 5) {
+					item.hidden = true;
+				}
+			});
+
+			showAllEvents.addEventListener("click", () => {
+				const expanded = showAllEvents.getAttribute("aria-expanded") === "true";
+				eventItems.forEach((item, index) => {
+					if (index >= 5) {
+						item.hidden = expanded;
+					}
+				});
+				showAllEvents.setAttribute("aria-expanded", String(!expanded));
+				showAllEvents.textContent = expanded
+					? "Show all {{events.length}}"
+					: "Show fewer";
+			});
+		}
+
+		if (showAllVolunteers) {
+			volunteerSignups.forEach((signup, index) => {
+				if (index >= 5) {
+					signup.closest("li").hidden = true;
+				}
+			});
+
+			showAllVolunteers.addEventListener("click", () => {
+				const expanded = showAllVolunteers.getAttribute("aria-expanded") === "true";
+				volunteerSignups.forEach((signup, index) => {
+					if (index >= 5) {
+						signup.closest("li").hidden = expanded;
+					}
+				});
+				showAllVolunteers.setAttribute("aria-expanded", String(!expanded));
+				showAllVolunteers.textContent = expanded
+					? "Show all {{volunteers.length}}"
+					: "Show fewer";
+			});
+		}
 
 		eventStart.addEventListener("change", () => {
 			eventEnd.min = eventStart.value;
