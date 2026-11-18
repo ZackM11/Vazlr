@@ -188,8 +188,10 @@ app.post("/login", async (req, res) => {
 		return;
 	}
 
-	res.render("pages/login", {
-		message: "Incorrect username/password",
+	res.status(401).render("pages/login", {
+		message: "Incorrect email or password",
+		error: true,
+		email: req.body.email,
 	});
 });
 
