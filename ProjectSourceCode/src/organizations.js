@@ -106,7 +106,7 @@ router.post("/events", requireOrganization, async (req, res) => {
 	try {
 		// The user's role and an actual organizations row are both required.
 		const organization = await db.oneOrNone(
-			"SELECT user_id FROM organizations WHERE user_id = $1", //TODO: fix db query
+			"SELECT user_id FROM organizations WHERE user_id = $1 AND role = 'organization';", //TODO: fix db query
 			[organizationId],
 		);
 		if (!organization) {
@@ -114,7 +114,6 @@ router.post("/events", requireOrganization, async (req, res) => {
 				.status(403)
 				.json({ message: "Your account has no organization profile." });
 		}
-
 		const category = await db.oneOrNone(
 			"SELECT id FROM categories WHERE id = $1",
 			[vbody.eventCategory],
