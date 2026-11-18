@@ -73,6 +73,11 @@ app.use(
 	}),
 );
 
+app.use((req, res, next) => {
+	res.locals.user = req.session && req.session.user;
+	next();
+});
+
 app.use(
 	bodyParser.urlencoded({
 		extended: true,
@@ -123,13 +128,26 @@ app.post("/register", async (req, res) => {
 	}
 
 	const hashed_pw = await bcrypt.hash(vbody.password, SALT_ROUNDS);
-	const query = `INSERT INTO users (email, password_hash, role)
-	               VALUES ('${vbody.email}', '${hashed_pw}', '${vbody.role}')
-	               RETURNING id, email, role, created_at;`;
 	let user;
 
 	try {
-		user = await db.one(query);
+		user = await db.tx(async (transaction) => {
+			const registeredUser = await transaction.one(
+				`INSERT INTO users (email, password_hash, role)
+				 VALUES ($1, $2, $3)
+				 RETURNING id, email, role, created_at;`,
+				[vbody.email, hashed_pw, vbody.role],
+			);
+
+			if (registeredUser.role === "organization") {
+				await transaction.none(
+					"INSERT INTO organizations (user_id, name) VALUES ($1, $2);",
+					[registeredUser.id, vbody.email.split("@")[0]],
+				);
+			}
+
+			return registeredUser;
+		});
 	} catch (err) {
 		if (err.code === pg_unique_violation) {
 			res.render("pages/register", {
