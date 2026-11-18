@@ -101,10 +101,24 @@ router.post("/events", requireOrganization, async (req, res) => {
 
 	try {
 		// The user's role and an actual organizations row are both required.
-		const organization = await db.oneOrNone(
-			"SELECT user_id FROM organizations WHERE user_id = $1 AND role = 'organization';", //TODO: fix db query
+		let organization = await db.oneOrNone(
+			"SELECT user_id FROM organizations WHERE user_id = $1;",
 			[organizationId],
 		);
+		if (!organization) {
+			await db.none(
+				`INSERT INTO organizations (user_id, name)
+				 SELECT id, split_part(email, '@', 1)
+				 FROM users
+				 WHERE id = $1 AND role = 'organization'
+				 ON CONFLICT (user_id) DO NOTHING;`,
+				[organizationId],
+			);
+			organization = await db.oneOrNone(
+				"SELECT user_id FROM organizations WHERE user_id = $1;",
+				[organizationId],
+			);
+		}
 		if (!organization) {
 			return res
 				.status(403)
@@ -149,11 +163,37 @@ router.post("/events", requireOrganization, async (req, res) => {
 		console.error("Error creating event:", err);
 		return res
 			.status(500)
-			.json({ message: "Unable to create the event. Please try again." });
+			.json({ message: "Unable to create the event. Please3000 try again." });
 	}
 });
 
+router.get("/getVolunteers", async (req, res) => {
+	const organizationId = req.session.user.id;
+
+	const query = `SELECT users.id, users.first_name, users.last_name, users.email, events.title AS event_title
+				   FROM users
+				   JOIN event_volunteers ON users.id = event_volunteers.user_id
+				   JOIN events ON event_volunteers.event_id = events.id
+				   WHERE events.organization_id = $1`;
+
+	let results;
+	try {
+		results = await db.any(query, [organizationId]);
+	} catch (err) {
+		console.log(`Error in getting volunteers: ${err}`);
+		res.status(400).json({
+			error: err,
+		});
+		return;
+	}
+	console.log(results);
+	res.render("pages/org-dash", {
+		results,
+	});
+});
+
 router.get("/dashboard", async (req, res) => {
+	const organizationId = req.session.user.id;
 	const query = `SELECT organization_id, category_id, title, description, image_url,
                     address, city, zip, start_time, end_time, capacity, status FROM events`; //TODO: Put events query here
 
