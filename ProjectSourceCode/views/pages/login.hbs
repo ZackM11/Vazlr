@@ -8,11 +8,310 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link href="/css/dashboard.css" rel="stylesheet">
+
+    <!-- WHERE THE STYLING LIVES
+         1. Bootstrap CDN link above: base components (grid, form controls).
+         2. /css/dashboard.css above: existing site CSS, left as it was.
+         3. The style block below: ALL of the new theme styling (colours, card, inputs, links, buttons,
+            light and dark mode). Same palette as home.hbs.
+         4. The script after it: applies the saved light or dark choice before the page paints.
+         In the markup: the vz-auth classes on main and the vz-btn classes on the button are the only hooks. -->
+    <style>
+    /* =====================================================================
+       VAZLR LOGIN / REGISTER THEME - all of the styling for these pages lives in this block.
+       Same yellow and palette as home.hbs (yellow sampled from the header: #ffc107).
+
+       1. Colour tokens ........ light = white/black/yellow, dark = black/yellow
+                                 (switched by data-bs-theme on the html element)
+       2. Page background + footer
+       3. .vz-auth scope ....... remaps Bootstrap variables so the existing Bootstrap
+                                 classes in the markup (card, form-control, form-check,
+                                 alert, text-muted) pick up the theme
+       4. Title, card, inputs, radios, links
+       5. Buttons .............. same .vz-btn look as home.hbs
+       6. Login-only rules ..... the login form is styled as a card (no markup change)
+       ===================================================================== */
+
+    /* ---------- 1. Colour tokens ---------- */
+    :root {
+        --vz-yellow: #ffc107;
+        --vz-yellow-hover: #ffcd38;
+        --vz-ink: #0b0b0b;
+
+        --vz-bg: #ffffff;
+        --vz-surface: #ffffff;
+        --vz-text: #0b0b0b;
+        --vz-muted: #4a4a4a;
+        --vz-border: #0b0b0b;
+        --vz-card-shadow: var(--vz-yellow);
+        --vz-focus: #0b0b0b;
+
+        --vz-input-bg: #ffffff;
+        --vz-input-border: #0b0b0b;
+        --vz-link: #0b0b0b;
+        --vz-accent-border: #0b0b0b;
+        --vz-ring: 0 0 0 3px #ffc107, 0 0 0 5px #0b0b0b;
+    }
+
+    :root[data-bs-theme="dark"] {
+        --vz-bg: #000000;
+        --vz-surface: #0f0f0f;
+        --vz-text: #ffffff;
+        --vz-muted: #b0b0b0;
+        --vz-border: #3a3a3a;
+        --vz-focus: #ffc107;
+
+        --vz-input-bg: #000000;
+        --vz-input-border: #6e6e6e;
+        --vz-link: #ffc107;
+        --vz-accent-border: #ffc107;
+        --vz-ring: 0 0 0 3px rgba(255, 193, 7, .4);
+    }
+
+    /* ---------- 2. Page background + footer (header stays yellow in both modes) ---------- */
+    :root[data-bs-theme] body {
+        background-color: var(--vz-bg);
+        color: var(--vz-text);
+    }
+
+    :root[data-bs-theme] footer,
+    :root[data-bs-theme] footer a {
+        background-color: transparent;
+        color: var(--vz-muted);
+    }
+
+    /* ---------- 3. .vz-auth scope (added to the page wrapper in the markup) ---------- */
+    .vz-auth {
+        --bs-body-color: var(--vz-text);
+        --bs-heading-color: var(--vz-text);
+        --bs-secondary-color: var(--vz-muted);
+        --bs-border-color: var(--vz-border);
+        --bs-box-shadow-sm: 5px 5px 0 var(--vz-card-shadow);
+
+        background: transparent;
+        color: var(--vz-text);
+        padding-top: clamp(1.75rem, 4vw, 3.5rem);
+        padding-bottom: 3rem;
+    }
+
+    /* Register's card (Bootstrap re-declares these variables on .card itself, so they are set here) */
+    .vz-auth .card {
+        --bs-card-bg: var(--vz-surface);
+        --bs-card-color: var(--vz-text);
+        --bs-card-border-color: var(--vz-border);
+        --bs-card-border-width: 2px;
+        --bs-card-border-radius: 1rem;
+        --bs-card-inner-border-radius: calc(1rem - 2px);
+        --bs-card-spacer-x: 1.75rem;
+        --bs-card-spacer-y: 1.75rem;
+    }
+
+    /* ---------- 4a. Title (yellow highlighter, same idea as "difference" on home) ---------- */
+    .vz-auth h1 {
+        display: table;
+        margin: 0 auto 1.5rem;
+        padding: 0 .15em;
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -.025em;
+        color: var(--vz-text);
+        background: linear-gradient(transparent 60%, var(--vz-yellow) 60%);
+    }
+
+    /* ---------- 4b. Labels, inputs, helper text ---------- */
+    .vz-auth .form-label {
+        font-weight: 700;
+        font-size: .9rem;
+        color: var(--vz-text);
+    }
+
+    .vz-auth .form-text {
+        font-size: .85rem;
+    }
+
+    .vz-auth .form-control {
+        padding: .65rem .9rem;
+        border: 2px solid var(--vz-input-border);
+        border-radius: .75rem;
+        background-color: var(--vz-input-bg);
+        color: var(--vz-text);
+    }
+
+    .vz-auth .form-control:focus {
+        border-color: var(--vz-accent-border);
+        background-color: var(--vz-input-bg);
+        color: var(--vz-text);
+        box-shadow: var(--vz-ring);
+        outline: 0;
+    }
+
+    .vz-auth .form-control:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px var(--vz-input-bg) inset;
+        -webkit-text-fill-color: var(--vz-text);
+        caret-color: var(--vz-text);
+    }
+
+    /* ---------- 4c. Radio buttons (Bootstrap's blue becomes yellow with a black dot) ---------- */
+    .vz-auth .form-check {
+        padding-left: 1.85em;
+    }
+
+    .vz-auth .form-check .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        margin-top: .15em;
+        margin-left: -1.85em;
+        border: 2px solid var(--vz-input-border);
+        background-color: var(--vz-input-bg);
+    }
+
+    .vz-auth .form-check .form-check-input:checked {
+        border-color: var(--vz-accent-border);
+        background-color: var(--vz-yellow);
+    }
+
+    .vz-auth .form-check .form-check-input[type="radio"]:checked {
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%230b0b0b'/%3e%3c/svg%3e");
+    }
+
+    .vz-auth .form-check .form-check-input:focus {
+        border-color: var(--vz-accent-border);
+        box-shadow: var(--vz-ring);
+    }
+
+    .vz-auth .form-check-label {
+        color: var(--vz-text);
+        cursor: pointer;
+    }
+
+    /* ---------- 4d. Links (black with a yellow underline in light mode, yellow in dark) ---------- */
+    .vz-auth a:not(.vz-btn) {
+        color: var(--vz-link);
+        font-weight: 700;
+        text-decoration: underline;
+        text-decoration-color: var(--vz-yellow);
+        text-decoration-thickness: .2em;
+        text-underline-offset: .15em;
+        text-decoration-skip-ink: none;
+    }
+
+    .vz-auth a:not(.vz-btn):hover {
+        background-color: var(--vz-yellow);
+        color: var(--vz-ink);
+    }
+
+    .vz-auth a:not(.vz-btn):focus-visible {
+        outline: 3px solid var(--vz-focus);
+        outline-offset: 2px;
+    }
+
+    /* ---------- 4e. Alerts (error messages keep Bootstrap's red; only the shape is restyled) ---------- */
+    .vz-auth .alert {
+        border-width: 2px;
+        border-radius: .75rem;
+        font-weight: 600;
+    }
+
+    /* ---------- 5. Buttons (same look as the yellow buttons on home.hbs) ---------- */
+    .vz-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: .65rem 1.4rem;
+        border: 2px solid var(--vz-ink);
+        border-radius: .75rem;
+        font-weight: 700;
+        line-height: 1.2;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+    }
+
+    .vz-btn-primary {
+        background: var(--vz-yellow);
+        color: var(--vz-ink);
+        border-color: var(--vz-ink);
+        box-shadow: 0 3px 0 var(--vz-ink);
+    }
+
+    :root[data-bs-theme="dark"] .vz-btn-primary {
+        border-color: var(--vz-yellow);
+        box-shadow: none;
+    }
+
+    .vz-btn-primary:hover {
+        background: var(--vz-yellow-hover);
+        color: var(--vz-ink);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 0 var(--vz-ink);
+    }
+
+    :root[data-bs-theme="dark"] .vz-btn-primary:hover {
+        box-shadow: 0 4px 0 rgba(255, 193, 7, .35);
+    }
+
+    .vz-btn:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    .vz-btn:focus-visible {
+        outline: 3px solid var(--vz-focus);
+        outline-offset: 3px;
+    }
+
+    /* ---------- 6. Login only: style the existing form as a card, centre text, match Register's width ---------- */
+    .vz-auth-login .col-md-6 {
+        width: 100%;
+        max-width: 480px;
+    }
+
+    .vz-auth-login form {
+        padding: 1.75rem;
+        background: var(--vz-surface);
+        border: 2px solid var(--vz-border);
+        border-radius: 1rem;
+        box-shadow: 5px 5px 0 var(--vz-card-shadow);
+    }
+
+    .vz-auth-login form + p {
+        text-align: center;
+        color: var(--vz-muted);
+    }
+
+    /* Error/flash messages line up with the card (456px = 480px column minus its padding) */
+    .vz-auth-login .alert {
+        max-width: 456px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .vz-btn {
+            transition: none;
+        }
+    }
+    </style>
+
+    <script>
+    /* Applies the saved light/dark choice (set by the toggle on the home page) before the page paints.
+       Falls back to the visitor's system setting. */
+    (function () {
+        var theme = null;
+        try { theme = localStorage.getItem('vazlr-theme'); } catch (e) { /* storage unavailable */ }
+        if (theme !== 'light' && theme !== 'dark') {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+    </script>
 </head>
 
-<main class="container"> <!-- Centers the content and adds side padding -->
+<!-- STYLING: vz-auth turns on the theme for this page. vz-auth-login adds the login-only rules (the form is styled as a card in the style block). -->
+<main class="container vz-auth vz-auth-login"> <!-- Centers the content and adds side padding -->
 {{> message}}
-<body> 
+<body>
   <div class="row justify-content-center"> <!-- Centers the column -->
     <div class="col-md-6"> <!-- Half-width column on medium+ screens -->
 
@@ -30,10 +329,10 @@
           <input type="password" class="form-control" id="password" name="password" required /> <!-- name="password"; type="password" hides the characters -->
         </div>
 
-        <button type="submit" class="btn btn-primary">Login</button> 
+        <button type="submit" class="vz-btn vz-btn-primary w-100">Login</button> <!-- STYLING: vz-btn vz-btn-primary replaces Bootstrap blue btn-primary (see the style block, section 5). w-100 makes it full width like Register. -->
       </form>
 
-      <p class="mt-3">Don't have an account? <a href="/register">Register</a></p> 
+      <p class="mt-3">Don't have an account? <a href="/register">Register</a></p>
     </div>
   </div>
 
@@ -42,4 +341,4 @@
         crossorigin="anonymous"></script>
 
 </main>
-</body>  
+</body>
