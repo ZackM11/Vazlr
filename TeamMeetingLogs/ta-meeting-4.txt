@@ -1,0 +1,13 @@
+Meeting with TA
+Nov 18
+
+- What everyone did for their commits:
+	* Lincoln got the login and register and volunteer dashboards pages working completely.
+	* Vidita added queries and added error message to login page
+	* Riley Added to the home page, added modal for event creation, worked on organization frontend.
+	* Allen worked on the organization backend, adding events.
+	* Zack completed the frontend for the registration page.
+
+- Make sure we having a functioning product by presentation.
+- Try to get almost everything done by Thanksgiving break ideally.
+- We reviewed our testing suite and how it worked.
