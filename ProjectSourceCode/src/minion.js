@@ -30,7 +30,7 @@ async function getEvents() {
 
 async function getEventByID(id) {
 	const query = `
-		SELECT e.*, o.name AS org_name
+		SELECT e.*, o.name AS org_name, o.is_verified
 		FROM events e
 		JOIN organizations o 
 		ON e.organization_id = o.user_id
@@ -72,6 +72,14 @@ router.get("/book-event", async (req, res) => {
 			error: err,
 		});
 	}
+
+	/* So that HBS can display event status */
+	if (event.status === "open") {
+		event.open = true;
+	} else {
+		event.open = false;
+	}
+
 	console.log(event);
 	res.render("pages/bookin-form", {
 		event: event

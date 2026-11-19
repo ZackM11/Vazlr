@@ -18,18 +18,26 @@
 
 
     <div class="card mb-4 shadow-sm">
-        {{#if event.image_url}}
-            <img src="{{event.image_url}}" class="card-img-top" alt="{{event.title}}" style ="max-height: 220px; object-fit: cover;">
-        {{/if}}
         <div class="card-body">
             <h2 class="card-title h4 mb-1">{{event.title}}</h2>
+			{{#if event.open}}
+				<span class="text-success fw-semibold">✓ Open</span>
+			{{else}}
+				<span class="text-danger fw-semibold">✗ Closed</span>
+			{{/if}}
             <p  class="text-muted mb-2">
                 Hosted by {{event.org_name}}
+				{{#if event.is_verified}}<span class="text-success fw-semibold">✓ Verified</span>{{/if}}
             </p>
-            <p class="mb-1"><strong>When:</strong> {{event.date}}{{#if event.time}} at {{event.time}}{{/if}}</p>
-            <p class="mb-1"><strong>Where:</strong> {{event.location}}</p>
-            {{#if event.spots_left}}
-                <p class="mb-0"><strong>Spots left:</strong> {{event.spots_left}}</p>
+			{{#if event.description}}
+				<div class="py-3">
+				{{event.description}}
+				</div>
+			{{/if}}
+			<p class="mb-1"><strong>When: </strong>{{event.start_time}} <strong>to</strong> {{event.end_time}}</p>
+			<p class="mb-1"><strong>Where:</strong> {{event.address}}, {{event.city}}, {{event.zip}}</p>
+            {{#if event.capacity}}
+                <p class="mb-0"><strong>Spots left:</strong> {{event.capacity}}</p>
             {{/if}}
         </div>
     </div>
