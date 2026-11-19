@@ -12,7 +12,16 @@ const zod = require("zod"); // For post request body validation
 const router = express.Router();
 
 const eventSchema = zod.object({
-	event_id: zod.coerce.number("Invalid event ID"),
+	event_id: zod.coerce.number().int("Invalid event ID"),
+});
+
+const bookEventSchema = zod.object({
+	event_id: zod.coerce.number().int("Invalid event ID"),
+	name: zod.string().max(100),
+	email: zod.string().email("Invalid user email"),
+	emergencyPhone: zod.string().max(15),
+	emergencyName: zod.string().max(100),
+	notes: zod.string().max(500)
 });
 
 const requireAuth = (req, res, next) => {
@@ -54,7 +63,7 @@ router.get("/dashboard", requireAuth, async (req, res) => {
 	});
 });
 
-router.get("/book-event", async (req, res) => {
+router.get("/book-event", requireAuth, async (req, res) => {
 	const zod_result = eventSchema.safeParse(req.query);
 
 	if (!zod_result.success) {
@@ -80,10 +89,43 @@ router.get("/book-event", async (req, res) => {
 		event.open = false;
 	}
 
-	console.log(event);
-	res.render("pages/bookin-form", {
-		event: event
+	console.log(event); res.render("pages/bookin-form", {
+		event: event,
+		user: req.session.user
 	});
+});
+
+router.post("/book-event", requireAuth, async (req, res) => {
+	const zod_result = bookEventSchema.safeParse(req.body);
+
+	if (!zod_result.success) {
+		return res.status(400).json({
+			errors: zod_result.error.flatten().fieldErrors,
+		});
+	}
+
+	let vbody = zod_result.data;
+
+	console.log(req.body);
+	const query = `
+		INSERT INTO bookings
+		(event_id, volunteer_id, status, emergency_contact_name,
+			emergency_contact_phone, notes, waiver_accepted, booked_at)
+		VALUES ('${vbody.event_id}', '${req.session.user.id}',
+			'confirmed', '${vbody.emergencyName}', '${vbody.emergencyContactPhone}',
+			'${vbody.notes}', TRUE, NOW());
+	`;
+	
+	try {
+		let result = await db.any(query);
+		res.redirect("volunteers/dashboard");
+	} catch (err) {
+		console.log(err);
+		res.render("pages/bookin-form", {
+			error: "Unable to book event",
+		});
+		return;
+	}
 });
 
 module.exports = router;
