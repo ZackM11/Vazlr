@@ -17,7 +17,7 @@ jobs:
         run: cp .env.example .env
 
       - name: Start server and run tests
-        working-directory: ProjectSourceCode
+        working-directory: ProjectSourceCode/test
         run: python3 autotest.py
 
       - name: Stop Docker containers
