@@ -11,6 +11,10 @@ const axios = require("axios");
 const zod = require("zod"); // For post request body validation
 const router = express.Router();
 
+const eventSchema = zod.object({
+	event_id: zod.coerce.number("Invalid event ID"),
+});
+
 const requireAuth = (req, res, next) => {
 	if (!req.session || !req.session.user) {
 		return res.redirect("/login");
@@ -19,28 +23,59 @@ const requireAuth = (req, res, next) => {
 	next();
 };
 
-router.get("/dashboard", requireAuth, (req, res) => {
+async function getEvents() {
+	const query = `SELECT * FROM events;`;
+	return await db.any(query);
+}
+
+async function getEventByID(id) {
+	const query = `
+		SELECT e.*, o.name AS org_name
+		FROM events e
+		JOIN organizations o 
+		ON e.organization_id = o.user_id
+		WHERE e.id = ${id};`
+	return await db.one(query);
+}
+
+router.get("/dashboard", requireAuth, async (req, res) => {
 	console.log(req.session.user); /* Example of how to access user session cookie */
-	res.render("pages/minion-dash", {
-		user: req.session.user
-	});
-});
-
-/* Get events for event calendar */
-router.get("/getEvents", async (req, res) => {
-	const query = `SELECT organization_id, category_id, title, description, image_url,
-                    address, city, zip, start_time, end_time, capacity, status FROM events;`; //don't need to display event id
-
+	let events;
 	try {
-		let results = await db.any(query);
-		res.status(200).json({
-			data: results,
-		});
+		events = await getEvents();
 	} catch (err) {
 		res.status(400).json({
 			error: err,
 		});
 	}
+	res.render("pages/minion-dash", {
+		user: req.session.user,
+		events: events
+	});
+});
+
+router.get("/book-event", async (req, res) => {
+	const zod_result = eventSchema.safeParse(req.query);
+
+	if (!zod_result.success) {
+		return res.status(400).json({
+			errors: zod_result.error.flatten().fieldErrors,
+		});
+	}
+	let vquery = zod_result.data;
+
+	let event;
+	try {
+		event = await getEventByID(vquery.event_id);
+	} catch (err) {
+		res.status(400).json({
+			error: err,
+		});
+	}
+	console.log(event);
+	res.render("pages/bookin-form", {
+		event: event
+	});
 });
 
 module.exports = router;
