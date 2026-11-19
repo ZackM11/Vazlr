@@ -132,7 +132,7 @@ org_session = requests.Session()
 def login_as_org():
     url = "http://localhost:3000/login"
 
-    payload = {"email": "testingorgs@gmail.com", "password": "qwertyqw"}
+    payload = {"email": "gloriousUser@gmail.com", "password": "4"}
     headers = {"Content-Type": "application/json"}
 
     response = org_session.post(url, json=payload, headers=headers)
