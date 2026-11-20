@@ -18,7 +18,7 @@ function requireOrganization(req, res, next) {
 	const user = req.session && req.session.user;
 	if (!user) {
 		if (req.path === "/dashboard") {
-			return res.redirect("/orgs/login");
+			return res.redirect("/login");
 		}
 		return res
 			.status(401)
@@ -48,6 +48,15 @@ const createEventSchema = zod.object({
 		new Date(eventEnd).getTime() > new Date(eventStart).getTime(),
 	{ path: ["eventEnd"], message: "End time must be after start time." },
 );
+const updateEventSchema = createEventSchema.safeExtend({
+	eventStatus: zod.enum(["open", "cancelled", "completed"]),
+});
+const eventIdSchema = zod.coerce.number().int().positive();
+
+function getUpcomingEvents(events) {
+	const now = Date.now();
+	return events.filter((event) => new Date(event.end_time).getTime() >= now);
+}
 
 router.get("/testing", (req, res) => {
 	res.send("You are a generous philanthropist");
@@ -58,34 +67,29 @@ module.exports = router;
 /* Bcrypt salt rounds */
 const SALT_ROUNDS = 12;
 
-const userSchema = zod.object({
-	email: zod.string().email("Invalid user email"),
-	password: zod.string(),
-});
-
 /* Get events for event calendar */
-router.get("/getEvents", async (req, res) => {
-	const zod_result = userSchema.safeParse(req.body);
-
-	// TODO: Put a query here that gets the org id from the email
-  const query2 = `SELECT id
-                  FROM users 
-                  WHERE email = $1`;
-
-	// TODO: Make this query only return events from the logged-in organization
-	const query = `SELECT title, description, image_url,
-                    address, city, zip, start_time, end_time, capacity, status 
-                    FROM events
-                    INNER JOIN organzations
-                    events.organization_id = organizations.user_id`; //TODO: Put events query here
+router.get("/getEvents", requireOrganization, async (req, res) => {
+	const organizationId = req.session.user.id;
+	const query = `SELECT id, organization_id, category_id, title, description, image_url,
+                    address, city, zip, start_time, end_time, capacity, status
+				   FROM events
+				   WHERE organization_id = $1
+				   ORDER BY start_time`;
 
 	try {
-		let events = await db.one(query);
+		const events = await db.any(query, [organizationId]);
+		const upcomingEvents = getUpcomingEvents(events);
 		res.render("pages/org-dash", {
 			events,
+			upcomingEvents,
+			showAllEvents: upcomingEvents.length > 5,
+			volunteers: [],
+			showAllVolunteers: false,
+			canEditEvents: true,
 		});
 	} catch (err) {
-		res.status(400).json({
+		console.error(`Error in getting organization events: ${err}`);
+		res.status(500).json({
 			error: err,
 		});
 	}
@@ -173,6 +177,67 @@ router.post("/events", requireOrganization, async (req, res) => {
 	}
 });
 
+router.put("/events/:eventId", requireOrganization, async (req, res) => {
+	const eventIdResult = eventIdSchema.safeParse(req.params.eventId);
+	if (!eventIdResult.success) {
+		return res.status(400).json({ message: "Invalid event ID." });
+	}
+
+	const eventResult = updateEventSchema.safeParse(req.body);
+	if (!eventResult.success) {
+		return res.status(400).json({
+			message: "Please correct the event fields and try again.",
+			errors: eventResult.error.flatten().fieldErrors,
+		});
+	}
+
+	const eventId = eventIdResult.data;
+	const organizationId = req.session.user.id;
+	const event = eventResult.data;
+
+	try {
+		const category = await db.oneOrNone(
+			"SELECT id FROM categories WHERE id = $1",
+			[event.eventCategory],
+		);
+		if (!category) {
+			return res.status(400).json({ message: "Select a valid event category." });
+		}
+
+		const updatedEvent = await db.oneOrNone(
+			`UPDATE events
+			 SET category_id = $1, title = $2, description = $3, image_url = $4,
+				 address = $5, city = $6, zip = $7, start_time = $8, end_time = $9,
+				 capacity = $10, status = $11
+			 WHERE id = $12 AND organization_id = $13
+			 RETURNING id, title, start_time, end_time, status`,
+			[
+				category.id,
+				event.eventName,
+				event.eventDescription,
+				event.eventImage || null,
+				event.eventAddress,
+				event.eventCity,
+				event.eventZip,
+				event.eventStart,
+				event.eventEnd,
+				event.eventCapacity,
+				event.eventStatus,
+				eventId,
+				organizationId,
+			],
+		);
+		if (!updatedEvent) {
+			return res.status(404).json({ message: "Event not found." });
+		}
+
+		return res.json({ message: "Event updated successfully.", data: updatedEvent });
+	} catch (err) {
+		console.error("Error updating event:", err);
+		return res.status(500).json({ message: "Unable to update the event. Please try again." });
+	}
+});
+
 router.get("/getVolunteers", async (req, res) => {
 	const organizationId = req.session.user.id;
 
@@ -201,7 +266,7 @@ router.get("/getVolunteers", async (req, res) => {
 	});
 });
 
-router.get("/dashboard", async (req, res) => {
+router.get("/dashboard", requireOrganization, async (req, res) => {
 	const organizationId = req.session.user.id;
 	const query = `SELECT id, organization_id, category_id, title, description, image_url,
                     address, city, zip, start_time, end_time, capacity, status
@@ -228,11 +293,14 @@ router.get("/dashboard", async (req, res) => {
 		});
 		return;
 	}
+	const upcomingEvents = getUpcomingEvents(events);
 	res.render("pages/org-dash", {
 		events,
-		showAllEvents: events.length > 5,
+		upcomingEvents,
+		showAllEvents: upcomingEvents.length > 5,
 		volunteers,
 		showAllVolunteers: volunteers.length > 5,
+		canEditEvents: true,
 	});
 });
 

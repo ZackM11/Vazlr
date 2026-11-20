@@ -261,7 +261,51 @@
     color: var(--dashboard-ink);
     background: #fff;
     font-size: .85rem;
-    text-align: center;
+    text-align: left;
+    vertical-align: top;
+}
+
+.dashboard-page .calendar-card .calendar-day-number {
+    font-size: .75rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.dashboard-page .calendar-card .week-heading th.is-today {
+    background-color: #ffc107;
+}
+
+.dashboard-page .calendar-card .calendar-event {
+    display: block;
+    width: 100%;
+    margin-top: .2rem;
+    padding: .2rem .3rem;
+    border: 0;
+    border-radius: .4rem;
+    color: inherit;
+    background: #edf4f5;
+    font: inherit;
+    font-size: .72rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    text-align: left;
+}
+
+.dashboard-page .calendar-card button.calendar-event {
+    cursor: pointer;
+}
+
+.dashboard-page .calendar-card button.calendar-event:hover,
+.dashboard-page .calendar-card button.calendar-event:focus-visible {
+    background: #dcebed;
+}
+
+.dashboard-page .calendar-card .calendar-event time {
+    font-weight: 700;
+}
+
+.dashboard-page .calendar-card .calendar-event-title {
+    display: block;
 }
 
 .dashboard-page .calendar-card .calendar-grid td:first-child {
@@ -272,12 +316,6 @@
 .dashboard-page .calendar-card .calendar-grid td:last-child {
     border-right: 1px solid #edf1f2;
     border-radius: 0 .65rem .65rem 0;
-}
-
-.dashboard-page .calendar-card .calendar-grid td[style*="--bs-table-bg"] {
-    border-color: #e4edbb;
-    background: #f3f8dc !important;
-    font-weight: 700;
 }
 
 @media (max-width: 767.98px) {

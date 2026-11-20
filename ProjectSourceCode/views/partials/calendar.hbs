@@ -1,5 +1,6 @@
 <!-- For testing (Please don't remove): SkibidiPartialCalendarIncluded67 -->
-<div class="container">
+<div class="container event-calendar"
+    data-can-edit-events="{{#if canEditEvents}}true{{else}}false{{/if}}">
     <div class="row justify-content-center">
         <div class="col-md-12 pt-1">
             <div class="bg-light">
@@ -7,41 +8,21 @@
                     <div class="d-flex">
                         <h5 class="pt-2 calendar-title">Event Calendar</h5>
                         <div class="ms-auto calendar-controls">
-                            <button
-                                class="btn calendar-action"
-                                type="button"
-                                onclick="goToToday()"
-                            >
+                            <button class="btn calendar-action" type="button" onclick="goToToday()">
                                 Today
                             </button>
-                            <button
-                                class="btn calendar-action"
-                                type="button"
-                                onclick="updateViewToWeek()"
-                            >
+                            <button class="btn calendar-action" type="button" onclick="updateViewToWeek()">
                                 Week View
                             </button>
-                            <button
-                                class="btn calendar-action"
-                                type="button"
-                                onclick="updateViewToMonth()"
-                            >
+                            <button class="btn calendar-action" type="button" onclick="updateViewToMonth()">
                                 Month View
                             </button>
-                            <button
-                                class="btn calendar-action calendar-nav"
-                                type="button"
-                                aria-label="Previous"
-                                onclick="goToPrevious()"
-                            >
+                            <button class="btn calendar-action calendar-nav" type="button" aria-label="Previous"
+                                onclick="goToPrevious()">
                                 &lsaquo;
                             </button>
-                            <button
-                                class="btn calendar-action calendar-nav"
-                                type="button"
-                                aria-label="Next"
-                                onclick="goToNext()"
-                            >
+                            <button class="btn calendar-action calendar-nav" type="button" aria-label="Next"
+                                onclick="goToNext()">
                                 &rsaquo;
                             </button>
                         </div>
@@ -65,13 +46,13 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Place sunday events</td>
-                    <td>Place monday events</td>
-                    <td>Place tuesday events</td>
-                    <td>Place wednesday events</td>
-                    <td>Place thursday events</td>
-                    <td>Place friday events</td>
-                    <td>Place saturday events</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>
             </tbody>
         </table>
@@ -88,162 +69,212 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Placeholder for month view events, you can dynamically generate the days of the month here -->
             </tbody>
         </table>
     </div>
+    <div class="calendar-event-data" hidden aria-hidden="true">
+        {{#each events}}
+        <span data-event-id="{{id}}" data-event-title="{{title}}" data-event-start="{{start_time}}"
+            data-event-end="{{end_time}}" data-event-description="{{description}}" data-event-address="{{address}}"
+            data-event-city="{{city}}" data-event-zip="{{zip}}" data-event-capacity="{{capacity}}"
+            data-event-category="{{category_id}}" data-event-image="{{image_url}}" data-event-status="{{status}}"></span>
+        {{/each}}
+    </div>
 </div>
 <script>
-    // Custom JavaScript for the calendar can go here
-    const calendarTable = document.querySelector("table");
-    const weekView = document.querySelector(".week-view");
-    const weekHeading = document.querySelector(".week-heading");
-    const monthView = document.querySelector(".month-view");
-    const calendarTitle = document.querySelector(".calendar-title");
-    const now = new Date();
-
-    const currDay = now.toLocaleDateString();
-    const startOfWeek = getWeekStartSunday();
-    const startOfMonth = getMonthCurrentMonth();
-
-    let currweek = startOfWeek;
-    let currmonth = startOfMonth;
-
+    const calendarRoot = document.currentScript.previousElementSibling;
+    const weekView = calendarRoot.querySelector(".week-view");
+    const weekHeading = calendarRoot.querySelector(".week-heading");
+    const monthView = calendarRoot.querySelector(".month-view");
+    const calendarTitle = calendarRoot.querySelector(".calendar-title");
+    const currentDate = new Date();
+    const events = Array.from(calendarRoot.querySelectorAll(".calendar-event-data span"))
+        .map((event) => ({
+            id: event.dataset.eventId,
+            title: event.dataset.eventTitle,
+            start: new Date(event.dataset.eventStart),
+            end: new Date(event.dataset.eventEnd),
+            description: event.dataset.eventDescription,
+            address: event.dataset.eventAddress,
+            city: event.dataset.eventCity,
+            zip: event.dataset.eventZip,
+            capacity: event.dataset.eventCapacity,
+            category: event.dataset.eventCategory,
+            image: event.dataset.eventImage,
+            status: event.dataset.eventStatus,
+        }))
+        .filter((event) => !Number.isNaN(event.start.getTime()) && !Number.isNaN(event.end.getTime()));
     let currview = "week";
-    if (currview === "week") {
-        updateViewToWeek();
-    } else {
-        updateViewToMonth();
-    }
-    function getMonthCurrentMonth() {
-        const now = new Date();
-        const mm = String(now.getMonth() + 1).padStart(2, "0");
-        return mm;
-    }
-    function getWeekStartSunday() {
-        const now = new Date();
-        const day = now.getDay(); // 0 (Sun) - 6 (Sat)
-        const diff = now.getDate() - day; // Adjust to Sunday
-        const sunday = new Date(now.setDate(diff));
 
-        // Format as MM/DD
-        const mm = String(sunday.getMonth() + 1).padStart(2, "0");
-        const dd = String(sunday.getDate()).padStart(2, "0");
-        return `${mm}/${dd}`;
+    function dateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
     }
-    function getMonthStart() {
-        return getWeekStartSunday().slice(0, 2);
+
+    function getWeekStart(date) {
+        const sunday = new Date(date);
+        sunday.setDate(date.getDate() - date.getDay());
+        sunday.setHours(0, 0, 0, 0);
+        return sunday;
     }
+
+    function updateCalendarTitle() {
+        calendarTitle.textContent = `Event Calendar - ${currentDate.toLocaleString(undefined, {
+            month: "long",
+            year: "numeric",
+        })}`;
+    }
+
+    function createDayCell(date, showDayNumber) {
+        const cell = document.createElement("td");
+        cell.dataset.date = dateKey(date);
+        if (showDayNumber) {
+            const dayNumber = document.createElement("div");
+            dayNumber.className = "calendar-day-number";
+            dayNumber.textContent = date.getDate();
+            cell.appendChild(dayNumber);
+        }
+        return cell;
+    }
+
+    function addEventsToCells() {
+        const eventsByDate = new Map();
+        events.forEach((event) => {
+            const eventDate = new Date(event.start);
+            eventDate.setHours(0, 0, 0, 0);
+            const lastEventDate = new Date(event.end);
+            lastEventDate.setHours(0, 0, 0, 0);
+
+            while (eventDate <= lastEventDate) {
+                const key = dateKey(eventDate);
+                if (!eventsByDate.has(key)) {
+                    eventsByDate.set(key, []);
+                }
+                eventsByDate.get(key).push(event);
+                eventDate.setDate(eventDate.getDate() + 1);
+            }
+        });
+
+        calendarRoot.querySelectorAll(".calendar-grid td[data-date]").forEach((cell) => {
+            const cellEvents = eventsByDate.get(cell.dataset.date) || [];
+            cellEvents.forEach((event) => {
+                const canEditEvents = calendarRoot.dataset.canEditEvents === "true";
+                const eventItem = document.createElement(canEditEvents ? "button" : "div");
+                if (canEditEvents) {
+                    eventItem.type = "button";
+                    eventItem.dataset.eventId = event.id;
+                    eventItem.setAttribute("aria-label", `Edit ${event.title}`);
+                    eventItem.addEventListener("click", () => {
+                        calendarRoot.dispatchEvent(new CustomEvent("calendar-event-selected", {
+                            bubbles: true,
+                            detail: event,
+                        }));
+                    });
+                }
+                eventItem.className = "calendar-event";
+
+                const eventTime = document.createElement("time");
+                eventTime.dateTime = event.start.toISOString();
+                eventTime.textContent = event.start.toLocaleTimeString(undefined, {
+                    hour: "numeric",
+                    minute: "2-digit",
+                });
+                const endTime = document.createElement("time");
+                endTime.dateTime = event.end.toISOString();
+                endTime.textContent = event.end.toLocaleTimeString(undefined, {
+                    hour: "numeric",
+                    minute: "2-digit",
+                });
+                eventItem.append(
+                    eventTime,
+                    document.createTextNode(" – "),
+                    endTime,
+                );
+                const eventTitle = document.createElement("span");
+                eventTitle.className = "calendar-event-title";
+                eventTitle.textContent = event.title;
+                eventItem.appendChild(eventTitle);
+                cell.appendChild(eventItem);
+            });
+        });
+    }
+
+    function highlightCurrentDay() {
+        weekHeading.querySelectorAll("th[data-date]").forEach((heading) => {
+            heading.classList.toggle("is-today", heading.dataset.date === dateKey(new Date()));
+        });
+    }
+
     function updateViewToMonth() {
         currview = "month";
         updateCalendarTitle();
         monthView.style.display = "table";
         weekView.style.display = "none";
         fillInMonthView();
-        highlightCurrentDay();
     }
-    function updateCalendarTitle() {
-        const month = now.toLocaleString(undefined, { month: "long" });
-        calendarTitle.textContent = `Event Calendar - ${month}`;
-    }
+
     function fillInMonthView() {
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        const daysInMonth = monthEnd.getDate();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const monthStart = new Date(year, month, 1);
+        const monthEnd = new Date(year, month + 1, 0);
+        const lastSaturday = new Date(monthEnd);
+        lastSaturday.setDate(monthEnd.getDate() + (6 - monthEnd.getDay()));
+        const cursor = getWeekStart(monthStart);
+        const tbody = monthView.querySelector("tbody");
 
-        const firstDayOfWeek = monthStart.getDay(); // 0 (Sun) - 6 (Sat)
-        const lastDayOfWeek = monthEnd.getDay(); // 0 (Sun) - 6 (Sat)
-
-        let html = "<tr>";
-        // Fill in empty cells for the first week
-        for (let i = 0; i < firstDayOfWeek; i++) {
-            html += "<td></td>";
-        }
-
-        // Fill in the days of the month
-        for (let day = 1; day <= daysInMonth; day++) {
-            html += `<td data-day="${day}">${day}</td>`;
-            if ((firstDayOfWeek + day) % 7 === 0) {
-                html += "</tr><tr>"; // Start a new row after Saturday
+        tbody.replaceChildren();
+        while (cursor <= lastSaturday) {
+            const row = document.createElement("tr");
+            for (let day = 0; day < 7; day += 1) {
+                row.appendChild(createDayCell(cursor, true));
+                cursor.setDate(cursor.getDate() + 1);
             }
+            tbody.appendChild(row);
         }
-
-        // Fill in empty cells for the last week
-        for (let i = lastDayOfWeek + 1; i < 7; i++) {
-            html += "<td></td>";
-        }
-        html += "</tr>";
-
-        monthView.querySelector("tbody").innerHTML = html;
+        addEventsToCells();
     }
+
     function updateViewToWeek() {
         currview = "week";
         updateCalendarTitle();
         weekView.style.display = "table";
         monthView.style.display = "none";
 
-        const sunday = new Date(now);
-        sunday.setDate(now.getDate() - now.getDay());
-        const days = [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-        ];
-        weekHeading.innerHTML = `
-                <tr>
-                    ${days
-                        .map((day, index) => {
-                            const date = new Date(sunday);
-                            date.setDate(sunday.getDate() + index);
-                            const shortDate = `${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
-                            return `<th scope="col">${day} ${shortDate}</th>`;
-                        })
-                        .join("")}
-                </tr>`;
-        highlightCurrentDay();
-        // Update the calendar table to show the week view
-    }
-    function highlightCurrentDay() {
-        const today = new Date();
-        weekView.querySelectorAll("th, td").forEach((cell) => {
-            cell.style.removeProperty("--bs-table-bg");
-        });
-        monthView.querySelectorAll("td").forEach((cell) => {
-            cell.style.removeProperty("--bs-table-bg");
-        });
+        const sunday = getWeekStart(currentDate);
+        const headingRow = document.createElement("tr");
+        const weekRow = document.createElement("tr");
+        const tbody = weekView.querySelector("tbody");
 
-        if (currview === "week") {
-            const weekStart = new Date(now);
-            weekStart.setDate(now.getDate() - now.getDay());
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 7);
-
-            if (today >= weekStart && today < weekEnd) {
-                weekView.querySelectorAll("tr").forEach((row) => {
-                    const cell = row.cells[today.getDay()];
-                    if (cell) {
-                        cell.style.setProperty("--bs-table-bg", "#ffc107");
-                    }
-                });
-            }
-        } else if (
-            now.getFullYear() === today.getFullYear() &&
-            now.getMonth() === today.getMonth()
-        ) {
-            const todayCell = monthView.querySelector(
-                `[data-day="${today.getDate()}"]`,
-            );
-            if (todayCell) {
-                todayCell.style.setProperty("--bs-table-bg", "#ffc107");
-            }
+        for (let day = 0; day < 7; day += 1) {
+            const date = new Date(sunday);
+            date.setDate(sunday.getDate() + day);
+            const heading = document.createElement("th");
+            heading.scope = "col";
+            heading.dataset.date = dateKey(date);
+            const dateLabel = document.createElement("span");
+            dateLabel.className = "calendar-date-label";
+            dateLabel.textContent = `${date.toLocaleDateString(undefined, {
+                weekday: "long",
+            })} ${date.toLocaleDateString(undefined, {
+                month: "2-digit",
+                day: "2-digit",
+            })}`;
+            heading.appendChild(dateLabel);
+            headingRow.appendChild(heading);
+            weekRow.appendChild(createDayCell(date, false));
         }
+
+        weekHeading.replaceChildren(headingRow);
+        tbody.replaceChildren(weekRow);
+        addEventsToCells();
+        highlightCurrentDay();
     }
+
     function goToToday() {
-        now.setTime(new Date().getTime());
+        currentDate.setTime(new Date().getTime());
         if (currview === "week") {
             updateViewToWeek();
         } else {
@@ -252,40 +283,27 @@
     }
     function goToPrevious() {
         if (currview === "week") {
-            const prevWeek = new Date(now);
-            prevWeek.setDate(now.getDate() - 7);
-            now.setTime(prevWeek.getTime());
+            currentDate.setDate(currentDate.getDate() - 7);
             updateViewToWeek();
         } else {
-            const prevMonth = new Date(
-                now.getFullYear(),
-                now.getMonth() - 1,
-                1,
-            );
-            now.setTime(prevMonth.getTime());
+            currentDate.setDate(1);
+            currentDate.setMonth(currentDate.getMonth() - 1);
             updateViewToMonth();
         }
     }
     function goToNext() {
         if (currview === "week") {
-            const nextWeek = new Date(now);
-            nextWeek.setDate(now.getDate() + 7);
-            now.setTime(nextWeek.getTime());
+            currentDate.setDate(currentDate.getDate() + 7);
             updateViewToWeek();
-            highlightCurrentDay();
         } else {
-            const nextMonth = new Date(
-                now.getFullYear(),
-                now.getMonth() + 1,
-                1,
-            );
-            now.setTime(nextMonth.getTime());
+            currentDate.setDate(1);
+            currentDate.setMonth(currentDate.getMonth() + 1);
             updateViewToMonth();
         }
     }
+
+    updateViewToWeek();
 </script>
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-    crossorigin="anonymous"
-></script>
+    crossorigin="anonymous"></script>

@@ -56,24 +56,24 @@
 												events
 											</p>
 										</div>
-										<span class="badge rounded-pill text-bg-light">{{events.length}} events</span>
+										<span class="badge rounded-pill text-bg-light">{{upcomingEvents.length}} events</span>
 									</div>
 									<ul class="list-group list-group-flush">
-										{{#each events}}
+										{{#each upcomingEvents}}
 										<li class="list-group-item event-item">
 											<span class="list-indicator" aria-hidden="true"></span>{{title}}
 											<span class="list-meta float-end">{{status}}</span>
 										</li>
 										{{else}}
 										<li class="list-group-item list-meta">
-											You have no events yet.
+											You have no upcoming events.
 										</li>
 										{{/each}}
 									</ul>
 									{{#if showAllEvents}}
 									<button id="showAllEvents" class="btn btn-link px-0 mt-2" type="button"
 										aria-expanded="false">
-										Show all {{events.length}}
+										Show all {{upcomingEvents.length}}
 									</button>
 									{{/if}}
 								</div>
@@ -93,13 +93,15 @@
 												events
 											</p>
 										</div>
-										<span class="badge rounded-pill text-bg-light">{{volunteers.length}} volunteers</span>
+										<span class="badge rounded-pill text-bg-light">{{volunteers.length}}
+											volunteers</span>
 									</div>
 									<ul class="list-group list-group-flush">
 										{{#each volunteers}}
 										<li class="list-group-item">
 											<span class="volunteer-signup" data-volunteer-index="{{@index}}">
-												<span class="list-indicator" aria-hidden="true"></span>{{first_name}} {{last_name}}
+												<span class="list-indicator" aria-hidden="true"></span>{{first_name}}
+												{{last_name}}
 												<span class="list-meta float-end">{{event_title}}</span>
 											</span>
 										</li>
@@ -140,7 +142,7 @@
 					<h1 class="modal-title fs-4 fw-bold mb-3">
 						Create an event
 					</h1>
-					<form id="createEventForm" action="/orgs/events" method="post">
+					<form id="createEventForm" action="/orgs/events" method="post" data-method="post">
 						<div id="createEventFeedback" class="alert d-none" role="alert" aria-live="polite"></div>
 						<div class="mb-3">
 							<label for="eventName" class="form-label">Event Title</label>
@@ -202,6 +204,7 @@
 							<select class="form-select" id="eventStatus" name="eventStatus" required>
 								<option value="open">Open</option>
 								<option value="cancelled">Cancelled</option>
+								<option value="completed" disabled>Completed</option>
 							</select>
 						</div>
 						<button id="createEventSubmit" type="submit" class="btn btn-primary rounded-3 px-4">
@@ -227,10 +230,61 @@
 		const createEventSubmit = document.getElementById("createEventSubmit");
 		const eventStart = document.getElementById("eventStart");
 		const eventEnd = document.getElementById("eventEnd");
+		const completedStatus = document.querySelector('#eventStatus option[value="completed"]');
+		const createEventModal = document.getElementById("createEventModal");
+		const createEventModalLabel = document.getElementById("createEventModalLabel");
+		const createEventHeading = createEventModal.querySelector(".modal-body > h1");
 		const showAllEvents = document.getElementById("showAllEvents");
 		const eventItems = document.querySelectorAll(".event-item");
 		const showAllVolunteers = document.getElementById("showAllVolunteers");
 		const volunteerSignups = document.querySelectorAll(".volunteer-signup");
+
+		function setCreateEventMode() {
+			createEventForm.reset();
+			createEventForm.action = "/orgs/events";
+			createEventForm.dataset.method = "post";
+			createEventModalLabel.textContent = "Create an event";
+			createEventHeading.textContent = "Create an event";
+			createEventSubmit.textContent = "Create Event";
+			completedStatus.disabled = true;
+			eventEnd.removeAttribute("min");
+			createEventFeedback.className = "alert d-none";
+			createEventFeedback.textContent = "";
+		}
+
+		document.querySelector('[data-bs-target="#createEventModal"]')
+			.addEventListener("click", setCreateEventMode);
+
+		document.querySelector(".event-calendar").addEventListener("calendar-event-selected", ({ detail }) => {
+			createEventForm.reset();
+			createEventForm.action = `/orgs/events/${encodeURIComponent(detail.id)}`;
+			createEventForm.dataset.method = "put";
+			createEventModalLabel.textContent = "Edit event";
+			createEventHeading.textContent = "Edit event";
+			createEventSubmit.textContent = "Save Changes";
+			completedStatus.disabled = false;
+			createEventFeedback.className = "alert d-none";
+			createEventFeedback.textContent = "";
+
+			document.getElementById("eventName").value = detail.title;
+			document.getElementById("eventDescription").value = detail.description;
+			document.getElementById("eventAddress").value = detail.address;
+			document.getElementById("eventCity").value = detail.city;
+			document.getElementById("eventZip").value = detail.zip;
+			document.getElementById("eventCapacity").value = detail.capacity;
+			document.getElementById("eventCategory").value = detail.category;
+			document.getElementById("eventImage").value = detail.image;
+			document.getElementById("eventStatus").value = detail.status;
+
+			const toLocalDateTime = (date) => {
+				const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+				return localDate.toISOString().slice(0, 16);
+			};
+			eventStart.value = toLocalDateTime(detail.start);
+			eventEnd.value = toLocalDateTime(detail.end);
+			eventEnd.min = eventStart.value;
+			bootstrap.Modal.getOrCreateInstance(createEventModal).show();
+		});
 
 		if (showAllEvents) {
 			eventItems.forEach((item, index) => {
@@ -248,7 +302,7 @@
 				});
 				showAllEvents.setAttribute("aria-expanded", String(!expanded));
 				showAllEvents.textContent = expanded
-					? "Show all {{events.length}}"
+					? "Show all {{upcomingEvents.length}}"
 					: "Show fewer";
 			});
 		}
@@ -296,7 +350,7 @@
 				}
 
 				const response = await fetch(createEventForm.action, {
-					method: createEventForm.method,
+					method: createEventForm.dataset.method,
 					headers: {
 						"Accept": "application/json",
 						"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -307,13 +361,12 @@
 
 				if (!response.ok) {
 					const fieldErrors = Object.values(result.errors || {}).flat();
-					throw new Error(fieldErrors.join(" ") || result.message || "Unable to create the event.");
+					throw new Error(fieldErrors.join(" ") || result.message || "Unable to save the event.");
 				}
 
 				createEventFeedback.className = "alert alert-success";
-				createEventFeedback.textContent = result.message || "Event created successfully.";
-				createEventForm.reset();
-				eventEnd.removeAttribute("min");
+				createEventFeedback.textContent = result.message || "Event saved successfully.";
+				window.location.reload();
 			} catch (error) {
 				createEventFeedback.className = "alert alert-danger";
 				createEventFeedback.textContent = error instanceof Error
